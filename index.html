@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mapa Interactivo con OpenStreetMap</title>
+  <title>Mapa Interactivo con Polígonos en OpenStreetMap</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -35,11 +35,29 @@
       maxZoom: 18,
     }).addTo(map);
 
-    // Puedes añadir un marcador, como ejemplo:
+    // Añadir un marcador en Madrid
     var marker = L.marker([40.4168, -3.7038]).addTo(map)
       .bindPopup('¡Hola Madrid!')
       .openPopup();
+
+    // Definir las coordenadas del polígono
+    var polygonCoords = [
+      [40.4178, -3.7124], // Coordenada 1
+      [40.4185, -3.7038], // Coordenada 2
+      [40.4128, -3.7034], // Coordenada 3
+      [40.4122, -3.7110], // Coordenada 4
+    ];
+
+    // Crear y añadir el polígono al mapa
+    var polygon = L.polygon(polygonCoords, {
+      color: 'blue',  // Color del borde
+      fillColor: '#3388ff',  // Color de relleno
+      fillOpacity: 0.4  // Opacidad del relleno
+    }).addTo(map);
+
+    // Añadir un popup al polígono
+    polygon.bindPopup("Este es un polígono en Madrid.");
   </script>
-  
+
 </body>
 </html>
