@@ -26,8 +26,8 @@
 
   <!-- Script para inicializar el mapa -->
   <script>
-    // Inicializar el mapa y establecer la vista predeterminada
-    var map = L.map('map').setView([40.4168, -3.7038], 13); // Coordenadas de Madrid
+    // Inicializar el mapa con una vista general (no es necesario centrarlo aún)
+    var map = L.map('map').setView([40.4168, -3.7038], 13); // Vista inicial en Madrid
 
     // Cargar el mapa desde OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -35,12 +35,7 @@
       maxZoom: 18,
     }).addTo(map);
 
-    // Añadir un marcador en Madrid
-    var marker = L.marker([40.4168, -3.7038]).addTo(map)
-      .bindPopup('¡Hola Madrid!')
-      .openPopup();
-
-    // Definir las coordenadas del polígono (asegurarse de que son coherentes y forman un área visible)
+    // Definir las coordenadas del polígono
     var polygonCoords = [
       [40.4178, -3.7124],  // Coordenada 1
       [40.4185, -3.7038],  // Coordenada 2
@@ -58,6 +53,10 @@
 
     // Añadir un popup al polígono
     polygon.bindPopup("Este es un polígono en Madrid.");
+
+    // Ajustar la vista del mapa para que el polígono sea visible
+    map.fitBounds(polygon.getBounds());
+
   </script>
 
 </body>
