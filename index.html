@@ -29,12 +29,19 @@
       font-size: 1.8rem;
       font-weight: 600;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: fixed; /* Fijar la barra superior */
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000; /* Asegurar que el header esté por encima de otros elementos */
     }
 
+    /* Ajustar el margen superior del mapa para que no se superponga con el header fijo */
     #map {
-      height: 100vh;
+      height: calc(100vh - 80px); /* Ajustamos la altura del mapa restando el tamaño del header fijo */
       width: 100%; /* El mapa ocupa toda la pantalla inicialmente */
-      margin-left: 0; /* Estado inicial sin margen */
+      margin-left: 0;
+      margin-top: 80px; /* Añadir margen superior para evitar solapamiento con el header */
       transition: width 0.3s ease, margin-left 0.3s ease;
     }
 
@@ -43,7 +50,7 @@
       height: 100vh;
       width: 150px; /* Reducción aún mayor del ancho de la barra lateral */
       position: fixed;
-      top: 0;
+      top: 80px; /* Ajustamos para que la barra lateral comience debajo del header fijo */
       left: 0;
       background-color: #2c3e50;
       color: white;
@@ -113,7 +120,7 @@
     /* Botón para abrir/cerrar la barra lateral */
     #toggleSidebarBtn {
       position: absolute;
-      top: 20px;
+      top: 100px; /* Ajustado para estar debajo del header */
       left: 20px; /* Estado inicial con la barra lateral oculta */
       font-size: 16px; /* Reducción del tamaño de la fuente */
       background-color: #3498db;
