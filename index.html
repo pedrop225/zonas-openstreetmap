@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <title>Mapa de Polígonos desde CSV</title>
+  <title>Mapa de Polígonos por Zona de Explotación</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -13,13 +13,6 @@
 
   <!-- Estilos propios -->
   <style>
-    /* Reinicio de estilos básicos para mantener la coherencia en todos los navegadores */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f4f4f9;
@@ -110,7 +103,7 @@
 
   <!-- Encabezado -->
   <header>
-    Visualización de Polígonos desde CSV
+    Visualización de Polígonos por Zona de Explotación
   </header>
 
   <!-- Contenedor del mapa -->
@@ -143,6 +136,19 @@
     // Capa de polígonos para agrupar todos los polígonos dibujados
     var polygonLayer = L.featureGroup().addTo(map);
 
+    // Colores asignados a cada Zona de Explotación
+    var zoneColors = {};
+
+    // Función para generar colores aleatorios
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
     // Función para leer el archivo CSV
     function loadCSV() {
       var fileInput = document.getElementById('fileInput');
@@ -168,19 +174,26 @@
       data.forEach(function(row) {
         try {
           var polygonData = JSON.parse(row['Poligon']);
+          var zone = row['ZE. Zona de Explotación'];
+
+          // Asignar color si la Zona de Explotación no tiene uno asignado
+          if (!zoneColors[zone]) {
+            zoneColors[zone] = getRandomColor();
+          }
+
           var coordinates = polygonData.coordinates[0].map(function(coord) {
             return [coord[1], coord[0]]; // Invertimos el orden a [latitud, longitud]
           });
 
           // Dibujar el polígono en el mapa
           var leafletPolygon = L.polygon(coordinates, {
-            color: 'blue',
-            fillColor: '#3388ff',
+            color: zoneColors[zone],
+            fillColor: zoneColors[zone],
             fillOpacity: 0.5
           }).addTo(polygonLayer); // Añadir a la capa de polígonos
           
           // Popup informativo con la sección censal
-          leafletPolygon.bindPopup("Sección Censal: " + row['ZE. Sección Censal']);
+          leafletPolygon.bindPopup("Sección Censal: " + row['ZE. Sección Censal'] + "<br>Zona de Explotación: " + zone);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
         }
@@ -195,7 +208,7 @@
 
   <!-- Footer -->
   <footer>
-    &copy; 2024 - Proyecto de Visualización de Polígonos
+    &copy; 2024 - Proyecto de Visualización de Polígonos por Zona de Explotación
   </footer>
 
 </body>
