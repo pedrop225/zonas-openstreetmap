@@ -171,6 +171,7 @@
       // Limpiar la capa de polígonos antes de dibujar nuevos
       polygonLayer.clearLayers();
 
+      // Colores asignados dinámicamente
       data.forEach(function(row) {
         try {
           var polygonData = JSON.parse(row['Poligon']);
