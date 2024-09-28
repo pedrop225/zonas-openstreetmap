@@ -64,7 +64,7 @@
     .file-upload-container {
       position: relative;
       width: 100%;
-      max-width: 350px; /* Reducir el tamaño del contenedor */
+      max-width: 350px; /* Reducción del tamaño del contenedor */
       text-align: center;
       margin: 0 auto;
     }
@@ -96,7 +96,7 @@
     .file-name {
       margin-top: 15px;
       font-size: 13px;
-      color: #666;
+      color: #666; /* Restablecer color de texto original */
       font-weight: 400;
       font-style: italic;
       text-align: center;
@@ -108,7 +108,7 @@
     .file-name i {
       margin-right: 8px;
       font-size: 1.2rem;
-      color: #3498db;
+      color: #3498db; /* Icono con el color original */
     }
 
     /* Botón para abrir/cerrar la barra lateral */
@@ -174,7 +174,7 @@
       // Cambiar la posición del mapa cuando se oculta o muestra la barra lateral
       if (sidebar.classList.contains('hidden')) {
         document.getElementById('map').style.marginLeft = "0";
-        document.getElementById('map').style.width = "100%";
+        document.getElementById('map').style.width = "100%"; // Asegurarse de que el mapa ocupe el 100% de la pantalla
       } else {
         document.getElementById('map').style.marginLeft = "250px";
         document.getElementById('map').style.width = "calc(100% - 250px)";
