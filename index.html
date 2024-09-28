@@ -1,33 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mapa con Polígonos desde Datos</title>
+  <title>Mapa con Polígonos desde CSV</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   
-  <!-- Estilos propios -->
   <style>
     #map {
-      height: 100vh;
+      height: 90vh;
       width: 100%;
+    }
+    #upload-csv {
+      padding: 10px;
     }
   </style>
 </head>
 <body>
-  
+
   <!-- Contenedor del mapa -->
   <div id="map"></div>
   
+  <!-- Input para subir el archivo CSV -->
+  <div id="upload-csv">
+    <input type="file" id="fileInput" accept=".csv" />
+    <button onclick="loadCSV()">Cargar CSV y Dibujar Polígonos</button>
+  </div>
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   
-  <!-- Script para inicializar el mapa y añadir los polígonos -->
+  <!-- PapaParse JS para leer CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  
+  <!-- Script para leer el archivo CSV y dibujar los polígonos -->
   <script>
     // Inicializar el mapa
-    var map = L.map('map').setView([28.0665, -16.7332], 13); // Centrado inicial en las coordenadas del primer polígono
+    var map = L.map('map').setView([28.0665, -16.7332], 13);
     
     // Cargar mapa desde OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -35,40 +46,47 @@
       maxZoom: 18,
     }).addTo(map);
 
-    // Datos de los polígonos
-    var polygonsData = [
-      {
-        "section_censal": 3800101007,
-        "coordinates": [
-          [-16.73322498784285, 28.0665583236078],
-          [-16.72732099796566, 28.06597845873892],
-          [-16.72162431710848, 28.06659155265807],
-          [-16.72158690531136, 28.06673866735565],
-          [-16.72922223941475, 28.07468836037956],
-          [-16.72918808855939, 28.09031765123864],
-          [-16.73562539889297, 28.0914862725735],
-          [-16.73855274970958, 28.08748055368468],
-          [-16.73322498784285, 28.0665583236078]
-        ]
-      }
-      // Agregar más polígonos de forma similar
-    ];
+    // Función para leer el archivo CSV
+    function loadCSV() {
+      var fileInput = document.getElementById('fileInput');
+      var file = fileInput.files[0];
 
-    // Añadir polígonos al mapa
-    polygonsData.forEach(function(polygon) {
-      var coordinates = polygon.coordinates.map(function(coord) {
-        return [coord[1], coord[0]]; // Invertimos el orden a [latitud, longitud]
+      if (file) {
+        Papa.parse(file, {
+          header: true,
+          complete: function(results) {
+            processCSVData(results.data);
+          }
+        });
+      } else {
+        alert("Por favor, selecciona un archivo CSV.");
+      }
+    }
+
+    // Función para procesar los datos del CSV y dibujar los polígonos
+    function processCSVData(data) {
+      data.forEach(function(row) {
+        try {
+          var polygonData = JSON.parse(row['Poligon']);
+          var coordinates = polygonData.coordinates[0].map(function(coord) {
+            return [coord[1], coord[0]]; // Invertimos el orden a [latitud, longitud]
+          });
+
+          // Dibujar el polígono en el mapa
+          var leafletPolygon = L.polygon(coordinates, {
+            color: 'blue',
+            fillColor: '#3388ff',
+            fillOpacity: 0.5
+          }).addTo(map);
+          
+          // Popup informativo con la sección censal
+          leafletPolygon.bindPopup("Sección Censal: " + row['ZE. Sección Censal']);
+        } catch (error) {
+          console.error("Error al procesar el polígono:", error);
+        }
       });
-      
-      var leafletPolygon = L.polygon(coordinates, {
-        color: 'blue',
-        fillColor: '#3388ff',
-        fillOpacity: 0.5
-      }).addTo(map);
-      
-      leafletPolygon.bindPopup("Sección Censal: " + polygon.section_censal);
-    });
+    }
   </script>
-  
+
 </body>
 </html>
