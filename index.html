@@ -61,26 +61,19 @@
       margin-bottom: 20px;
     }
 
-    .sidebar input, .sidebar button {
+    .file-upload-container {
+      position: relative;
       width: 100%;
-      margin: 10px 0;
+      max-width: 400px;
+      text-align: center;
+      margin: 0 auto;
     }
 
-    .sidebar input[type="file"] {
-      padding: 12px;
-      border: 2px dashed #3498db;
-      border-radius: 8px;
-      background-color: #ecf0f1;
-      font-size: 16px;
-      color: #2980b9;
-      transition: border-color 0.3s ease;
+    .file-upload-input {
+      display: none;
     }
 
-    .sidebar input[type="file"]:hover {
-      border-color: #2980b9;
-    }
-
-    .sidebar button {
+    .file-upload-button {
       background-color: #3498db;
       color: white;
       padding: 12px 20px;
@@ -92,11 +85,19 @@
       text-transform: uppercase;
       box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+      max-width: 400px;
     }
 
-    .sidebar button:hover {
+    .file-upload-button:hover {
       background-color: #2980b9;
       box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
     }
 
     /* Botón para abrir/cerrar la barra lateral */
@@ -129,7 +130,11 @@
   <!-- Barra lateral -->
   <div class="sidebar" id="sidebar">
     <h2>Opciones</h2>
-    <input type="file" id="fileInput" accept=".csv" />
+    <div class="file-upload-container">
+      <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
+      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="displayFileName()" />
+      <p class="file-name" id="fileName">No se ha seleccionado ningún archivo</p>
+    </div>
     <button onclick="loadCSV()">Cargar CSV y Dibujar Polígonos</button>
   </div>
 
@@ -161,6 +166,13 @@
         document.getElementById('map').style.marginLeft = "250px";
         document.getElementById('map').style.width = "calc(100% - 250px)";
       }
+    }
+
+    // Función para mostrar el nombre del archivo seleccionado
+    function displayFileName() {
+      var fileInput = document.getElementById('fileInput');
+      var fileName = document.getElementById('fileName');
+      fileName.textContent = fileInput.files.length ? fileInput.files[0].name : "No se ha seleccionado ningún archivo";
     }
 
     // Inicializar el mapa
