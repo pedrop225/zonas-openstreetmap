@@ -213,6 +213,12 @@
   <div class="sidebar" id="sidebar">
     <h2>Opciones</h2>
     
+    <div class="file-upload-container">
+      <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
+      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="handleFileSelection()" />
+      <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i>No se ha seleccionado ningún archivo</p>
+    </div>
+
     <!-- Switch V. Inicial -->
     <div class="switch-container">
       <span class="switch-label">V. Inicial</span>
@@ -231,11 +237,6 @@
       </label>
     </div>
 
-    <div class="file-upload-container">
-      <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
-      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="handleFileSelection()" />
-      <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i>No se ha seleccionado ningún archivo</p>
-    </div>
   </div>
 
   <!-- Contenedor del mapa -->
