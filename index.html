@@ -40,19 +40,20 @@
       .bindPopup('¡Hola Madrid!')
       .openPopup();
 
-    // Definir las coordenadas del polígono
+    // Definir las coordenadas del polígono (asegurarse de que son coherentes y forman un área visible)
     var polygonCoords = [
-      [40.4178, -3.7124], // Coordenada 1
-      [40.4185, -3.7038], // Coordenada 2
-      [40.4128, -3.7034], // Coordenada 3
-      [40.4122, -3.7110], // Coordenada 4
+      [40.4178, -3.7124],  // Coordenada 1
+      [40.4185, -3.7038],  // Coordenada 2
+      [40.4128, -3.7034],  // Coordenada 3
+      [40.4122, -3.7110]   // Coordenada 4
     ];
 
     // Crear y añadir el polígono al mapa
     var polygon = L.polygon(polygonCoords, {
       color: 'blue',  // Color del borde
       fillColor: '#3388ff',  // Color de relleno
-      fillOpacity: 0.4  // Opacidad del relleno
+      fillOpacity: 0.4,  // Opacidad del relleno
+      weight: 2,  // Grosor del borde
     }).addTo(map);
 
     // Añadir un popup al polígono
