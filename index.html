@@ -33,40 +33,40 @@
 
     #map {
       height: 100vh;
-      width: calc(100% - 250px); /* Dejar espacio para la barra lateral */
-      margin-left: 250px; /* Mover mapa para que no quede debajo de la barra lateral */
+      width: calc(100% - 200px); /* Ajuste al nuevo ancho de la barra lateral */
+      margin-left: 200px; /* Ajuste al nuevo ancho de la barra lateral */
+      transition: width 0.3s ease, margin-left 0.3s ease;
     }
 
     /* Estilo de la barra lateral */
     .sidebar {
       height: 100vh;
-      width: 250px;
+      width: 200px; /* Reducción del ancho de la barra lateral */
       position: fixed;
       top: 0;
       left: 0;
       background-color: #2c3e50;
       color: white;
-      padding: 20px;
+      padding: 15px; /* Reducimos el padding */
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       transform: translateX(0);
       transition: transform 0.3s ease;
     }
 
     .sidebar.hidden {
-      transform: translateX(-250px);
+      transform: translateX(-200px);
     }
 
     .sidebar h2 {
-      font-size: 1.4rem;
-      margin-bottom: 20px;
+      font-size: 1.2rem; /* Reducción del tamaño del texto */
+      margin-bottom: 15px; /* Menor espacio entre los elementos */
+      text-align: left; /* Alineación a la izquierda */
     }
 
     .file-upload-container {
       position: relative;
       width: 100%;
-      max-width: 350px; /* Reducción del tamaño del contenedor */
-      text-align: center;
-      margin: 0 auto;
+      text-align: left; /* Alinear a la izquierda */
     }
 
     .file-upload-input {
@@ -76,10 +76,10 @@
     .file-upload-button {
       background-color: #3498db;
       color: white;
-      padding: 10px 18px; /* Botón ligeramente más pequeño */
+      padding: 8px 16px; /* Botón ligeramente más pequeño */
       border: none;
-      border-radius: 20px;
-      font-size: 14px; /* Reducir tamaño de la fuente */
+      border-radius: 18px; /* Reducción del tamaño del borde */
+      font-size: 12px; /* Reducir tamaño de la fuente */
       cursor: pointer;
       font-weight: 500;
       text-transform: uppercase;
@@ -94,32 +94,31 @@
     }
 
     .file-name {
-      margin-top: 15px;
-      font-size: 13px;
-      color: #666; /* Restablecer color de texto original */
+      margin-top: 10px; /* Espacio más reducido */
+      font-size: 12px; /* Reducir el tamaño del texto */
+      color: #666;
       font-weight: 400;
       font-style: italic;
-      text-align: center;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start; /* Alineación a la izquierda */
     }
 
     .file-name i {
-      margin-right: 8px;
-      font-size: 1.2rem;
-      color: #3498db; /* Icono con el color original */
+      margin-right: 6px;
+      font-size: 1rem; /* Reducción del tamaño del icono */
+      color: #3498db;
     }
 
     /* Botón para abrir/cerrar la barra lateral */
     #toggleSidebarBtn {
       position: absolute;
       top: 20px;
-      left: 250px;
-      font-size: 20px;
+      left: 200px; /* Ajustar al nuevo ancho de la barra lateral */
+      font-size: 18px; /* Reducción del tamaño de la fuente */
       background-color: #3498db;
       color: white;
-      padding: 10px 15px;
+      padding: 8px 12px; /* Reducción del padding */
       border: none;
       cursor: pointer;
       border-radius: 5px;
@@ -176,8 +175,8 @@
         document.getElementById('map').style.marginLeft = "0";
         document.getElementById('map').style.width = "100%"; // Asegurarse de que el mapa ocupe el 100% de la pantalla
       } else {
-        document.getElementById('map').style.marginLeft = "250px";
-        document.getElementById('map').style.width = "calc(100% - 250px)";
+        document.getElementById('map').style.marginLeft = "200px"; /* Ajuste al nuevo ancho de la barra lateral */
+        document.getElementById('map').style.width = "calc(100% - 200px)"; /* Ajuste al nuevo ancho de la barra lateral */
       }
     }
 
