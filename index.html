@@ -137,7 +137,8 @@
 
     /* Ajustar la posición de los controles del mapa para evitar superposición con la barra lateral */
     .leaflet-top.leaflet-left {
-      left: 200px; /* Ajustamos el margen izquierdo para que los controles no se superpongan con la barra lateral */
+      left: 50px; /* Ajustamos el margen izquierdo para acercar los controles del zoom al botón de la barra lateral */
+      z-index: 1002; /* Aseguramos que esté por encima del mapa */
     }
 
   </style>
