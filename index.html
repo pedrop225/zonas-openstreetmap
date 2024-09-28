@@ -132,10 +132,9 @@
     <h2>Opciones</h2>
     <div class="file-upload-container">
       <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
-      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="displayFileName()" />
+      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="handleFileSelection()" />
       <p class="file-name" id="fileName">No se ha seleccionado ningún archivo</p>
     </div>
-    <button onclick="loadCSV()">Cargar CSV y Dibujar Polígonos</button>
   </div>
 
   <!-- Botón para abrir/cerrar la barra lateral -->
@@ -168,11 +167,18 @@
       }
     }
 
-    // Función para mostrar el nombre del archivo seleccionado
-    function displayFileName() {
+    // Función que maneja la selección del archivo y carga los datos automáticamente
+    function handleFileSelection() {
       var fileInput = document.getElementById('fileInput');
       var fileName = document.getElementById('fileName');
+      
+      // Mostrar el nombre del archivo
       fileName.textContent = fileInput.files.length ? fileInput.files[0].name : "No se ha seleccionado ningún archivo";
+      
+      // Cargar los datos automáticamente
+      if (fileInput.files.length) {
+        loadCSV();
+      }
     }
 
     // Inicializar el mapa
