@@ -135,6 +135,64 @@
       color: #3498db;
     }
 
+    /* Estilo para los interruptores (switch) */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      color: white;
+    }
+
+    .switch-label {
+      font-size: 14px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(14px);
+    }
+
     /* Ajustar la posición de los controles del mapa para evitar superposición con la barra lateral */
     .leaflet-top.leaflet-left {
       left: 50px; /* Ajustamos el margen izquierdo para acercar los controles del zoom al botón de la barra lateral */
@@ -154,6 +212,25 @@
   <!-- Barra lateral -->
   <div class="sidebar" id="sidebar">
     <h2>Opciones</h2>
+    
+    <!-- Switch V. Inicial -->
+    <div class="switch-container">
+      <span class="switch-label">V. Inicial</span>
+      <label class="switch">
+        <input type="checkbox" id="vInicialSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Switch V. Final -->
+    <div class="switch-container">
+      <span class="switch-label">V. Final</span>
+      <label class="switch">
+        <input type="checkbox" id="vFinalSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <div class="file-upload-container">
       <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
       <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="handleFileSelection()" />
