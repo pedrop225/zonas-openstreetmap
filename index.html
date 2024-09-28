@@ -48,15 +48,15 @@
     /* Estilo de la barra lateral */
     .sidebar {
       height: 100vh;
-      width: 150px; /* Ancho de la barra lateral */
+      width: 180px; /* Aumentamos el ancho de la barra lateral */
       position: fixed;
-      top: 80px; /* Ajustado para estar debajo del header */
+      top: 80px; /* Ajustamos para que la barra lateral comience debajo del header fijo */
       left: 0;
       background-color: #2c3e50;
       color: white;
-      padding: 10px;
+      padding: 15px; /* Aumentamos el padding */
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      transform: translateX(-150px); /* Estado inicial oculto */
+      transform: translateX(-180px); /* Estado inicial oculto */
       transition: transform 0.3s ease;
       z-index: 999; /* Aseguramos que esté por encima del contenido del mapa */
     }
@@ -66,8 +66,8 @@
     }
 
     .sidebar h2 {
-      font-size: 1rem; /* Tamaño del texto */
-      margin-bottom: 10px;
+      font-size: 1.1rem; /* Aumentamos ligeramente el tamaño del texto */
+      margin-bottom: 15px;
       text-align: left;
     }
 
@@ -84,10 +84,10 @@
     .file-upload-button {
       background-color: #3498db;
       color: white;
-      padding: 6px 12px;
+      padding: 8px 14px; /* Botón ligeramente más grande */
       border: none;
-      border-radius: 16px;
-      font-size: 10px;
+      border-radius: 18px;
+      font-size: 12px; /* Aumentamos el tamaño de la fuente */
       cursor: pointer;
       font-weight: 500;
       text-transform: uppercase;
@@ -102,8 +102,8 @@
     }
 
     .file-name {
-      margin-top: 8px;
-      font-size: 10px;
+      margin-top: 10px; /* Espacio ligeramente mayor */
+      font-size: 12px; /* Aumentamos el tamaño del texto */
       color: #666;
       font-weight: 400;
       font-style: italic;
@@ -113,8 +113,8 @@
     }
 
     .file-name i {
-      margin-right: 5px;
-      font-size: 0.8rem;
+      margin-right: 6px;
+      font-size: 1rem; /* Aumentamos ligeramente el tamaño del icono */
       color: #3498db;
     }
 
@@ -123,10 +123,10 @@
       position: fixed; /* Fijamos la posición para que esté siempre visible */
       top: 100px; /* Ajustado para estar debajo del header */
       left: 20px; /* Estado inicial con la barra lateral oculta */
-      font-size: 16px;
+      font-size: 18px; /* Aumentamos ligeramente el tamaño de la fuente */
       background-color: #3498db;
       color: white;
-      padding: 6px 10px;
+      padding: 8px 14px; /* Aumentamos el padding */
       border: none;
       cursor: pointer;
       border-radius: 5px;
@@ -136,8 +136,14 @@
 
     /* Asegurarse de que el botón se mueva cuando la barra lateral esté visible */
     .sidebar.visible + #toggleSidebarBtn {
-      left: 170px;
+      left: 200px; /* Aumentado para alinearse con la nueva barra lateral */
     }
+
+    /* Ajustar la posición de los controles del mapa para evitar superposición con la barra lateral */
+    .leaflet-top.leaflet-left {
+      left: 210px; /* Ajustamos el margen izquierdo para que los controles no se superpongan con la barra lateral */
+    }
+
   </style>
 </head>
 <body>
@@ -182,9 +188,9 @@
 
       // Cambiar la posición del mapa cuando se oculta o muestra la barra lateral
       if (sidebar.classList.contains('visible')) {
-        document.getElementById('map').style.marginLeft = "150px"; /* Ajuste al nuevo ancho de la barra lateral */
-        document.getElementById('map').style.width = "calc(100% - 150px)"; /* Ajuste al nuevo ancho de la barra lateral */
-        toggleBtn.style.left = "170px"; /* Mover el botón cuando la barra esté visible */
+        document.getElementById('map').style.marginLeft = "180px"; /* Ajuste al nuevo ancho de la barra lateral */
+        document.getElementById('map').style.width = "calc(100% - 180px)"; /* Ajuste al nuevo ancho de la barra lateral */
+        toggleBtn.style.left = "200px"; /* Mover el botón cuando la barra esté visible */
       } else {
         document.getElementById('map').style.marginLeft = "0";
         document.getElementById('map').style.width = "100%"; // Asegurarse de que el mapa ocupe el 100% de la pantalla
