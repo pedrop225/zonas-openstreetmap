@@ -48,17 +48,16 @@
     /* Estilo de la barra lateral */
     .sidebar {
       height: 100vh;
-      width: 180px; /* Aumentamos el ancho de la barra lateral */
+      width: 150px; /* Reducción aún mayor del ancho de la barra lateral */
       position: fixed;
       top: 80px; /* Ajustamos para que la barra lateral comience debajo del header fijo */
       left: 0;
       background-color: #2c3e50;
       color: white;
-      padding: 15px; /* Aumentamos el padding */
+      padding: 10px; /* Padding reducido */
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      transform: translateX(-180px); /* Estado inicial oculto */
+      transform: translateX(-150px); /* Estado inicial oculto */
       transition: transform 0.3s ease;
-      z-index: 999; /* Asegurar que esté por encima del contenido */
     }
 
     .sidebar.visible {
@@ -66,8 +65,8 @@
     }
 
     .sidebar h2 {
-      font-size: 1.1rem; /* Aumentamos el tamaño del texto */
-      margin-bottom: 15px; /* Mayor espacio entre los elementos */
+      font-size: 1rem; /* Reducción del tamaño del texto */
+      margin-bottom: 10px; /* Menor espacio entre los elementos */
       text-align: left; /* Alineación a la izquierda */
     }
 
@@ -84,10 +83,10 @@
     .file-upload-button {
       background-color: #3498db;
       color: white;
-      padding: 8px 14px; /* Botón ligeramente más grande */
+      padding: 6px 12px; /* Botón más pequeño */
       border: none;
-      border-radius: 18px; /* Aumentamos el tamaño del borde */
-      font-size: 12px; /* Aumentamos el tamaño de la fuente */
+      border-radius: 16px; /* Reducción del tamaño del borde */
+      font-size: 10px; /* Reducir tamaño de la fuente */
       cursor: pointer;
       font-weight: 500;
       text-transform: uppercase;
@@ -102,8 +101,8 @@
     }
 
     .file-name {
-      margin-top: 10px; /* Espacio ligeramente mayor */
-      font-size: 12px; /* Aumentamos el tamaño del texto */
+      margin-top: 8px; /* Espacio más reducido */
+      font-size: 10px; /* Reducir el tamaño del texto */
       color: #666;
       font-weight: 400;
       font-style: italic;
@@ -113,29 +112,28 @@
     }
 
     .file-name i {
-      margin-right: 6px;
-      font-size: 1rem; /* Aumentamos el tamaño del icono */
+      margin-right: 5px;
+      font-size: 0.8rem; /* Reducción del tamaño del icono */
       color: #3498db;
     }
 
     /* Botón para abrir/cerrar la barra lateral */
     #toggleSidebarBtn {
-      position: fixed; /* Cambiar a fixed para que siempre sea visible */
+      position: absolute;
       top: 100px; /* Ajustado para estar debajo del header */
       left: 20px; /* Estado inicial con la barra lateral oculta */
-      font-size: 18px; /* Aumentamos el tamaño de la fuente */
+      font-size: 16px; /* Reducción del tamaño de la fuente */
       background-color: #3498db;
       color: white;
-      padding: 8px 14px; /* Aumentamos el padding */
+      padding: 6px 10px; /* Reducción del padding */
       border: none;
       cursor: pointer;
       border-radius: 5px;
-      z-index: 1001; /* Asegurar que esté por encima del contenido */
       transition: left 0.3s ease;
     }
 
     .sidebar.visible + #toggleSidebarBtn {
-      left: 200px; /* Mover el botón cuando la barra esté visible */
+      left: 170px; /* Mover el botón cuando la barra esté visible */
     }
   </style>
 </head>
@@ -181,9 +179,9 @@
 
       // Cambiar la posición del mapa cuando se oculta o muestra la barra lateral
       if (sidebar.classList.contains('visible')) {
-        document.getElementById('map').style.marginLeft = "180px"; /* Ajuste al nuevo ancho de la barra lateral */
-        document.getElementById('map').style.width = "calc(100% - 180px)"; /* Ajuste al nuevo ancho de la barra lateral */
-        toggleBtn.style.left = "200px"; /* Mover el botón cuando la barra esté visible */
+        document.getElementById('map').style.marginLeft = "150px"; /* Ajuste al nuevo ancho de la barra lateral */
+        document.getElementById('map').style.width = "calc(100% - 150px)"; /* Ajuste al nuevo ancho de la barra lateral */
+        toggleBtn.style.left = "170px"; /* Mover el botón cuando la barra esté visible */
       } else {
         document.getElementById('map').style.marginLeft = "0";
         document.getElementById('map').style.width = "100%"; // Asegurarse de que el mapa ocupe el 100% de la pantalla
