@@ -1,24 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Mapa con Polígonos desde CSV</title>
+  <title>Mapa de Polígonos desde CSV</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
+
+  <!-- Estilos propios -->
   <style>
-    #map {
-      height: 90vh;
-      width: 100%;
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f7f6;
     }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    #map {
+      height: 80vh;
+      width: 100%;
+      margin-top: 10px;
+    }
+
     #upload-csv {
+      text-align: center;
+      padding: 20px;
+    }
+
+    #fileInput {
       padding: 10px;
+      border: 2px dashed #4CAF50;
+      border-radius: 10px;
+      background-color: white;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    #fileInput:hover {
+      border-color: #45a049;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background-color: #333;
+      color: white;
+      font-size: 0.9rem;
+      position: relative;
+      bottom: 0;
+      width: 100%;
     }
   </style>
 </head>
 <body>
+
+  <!-- Encabezado -->
+  <header>
+    Visualización de Polígonos desde CSV
+  </header>
 
   <!-- Contenedor del mapa -->
   <div id="map"></div>
@@ -26,6 +94,7 @@
   <!-- Input para subir el archivo CSV -->
   <div id="upload-csv">
     <input type="file" id="fileInput" accept=".csv" />
+    <br />
     <button onclick="loadCSV()">Cargar CSV y Dibujar Polígonos</button>
   </div>
 
@@ -98,6 +167,11 @@
       }
     }
   </script>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2024 - Proyecto de Visualización de Polígonos
+  </footer>
 
 </body>
 </html>
