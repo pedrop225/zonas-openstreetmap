@@ -17,6 +17,8 @@
       font-family: 'Poppins', sans-serif;
       background-color: #f4f4f9;
       color: #333;
+      margin: 0;
+      padding: 0;
     }
 
     header {
@@ -30,46 +32,58 @@
     }
 
     #map {
-      height: 70vh;
-      width: 100%;
-      margin-top: 20px;
+      height: 100vh;
+      width: calc(100% - 250px); /* Dejar espacio para la barra lateral */
+      margin-left: 250px; /* Mover mapa para que no quede debajo de la barra lateral */
     }
 
-    #upload-csv {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
+    /* Estilo de la barra lateral */
+    .sidebar {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #2c3e50;
+      color: white;
       padding: 20px;
-      margin-top: 20px;
-      background-color: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      width: 80%;
-      margin: 20px auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      transform: translateX(0);
+      transition: transform 0.3s ease;
     }
 
-    #fileInput {
+    .sidebar.hidden {
+      transform: translateX(-250px);
+    }
+
+    .sidebar h2 {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+
+    .sidebar input, .sidebar button {
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .sidebar input[type="file"] {
       padding: 12px;
       border: 2px dashed #3498db;
       border-radius: 8px;
       background-color: #ecf0f1;
       font-size: 16px;
       color: #2980b9;
-      width: 100%;
-      max-width: 400px;
       transition: border-color 0.3s ease;
-      margin-bottom: 20px;
     }
 
-    #fileInput:hover {
+    .sidebar input[type="file"]:hover {
       border-color: #2980b9;
     }
 
-    button {
+    .sidebar button {
       background-color: #3498db;
       color: white;
-      padding: 12px 30px;
+      padding: 12px 20px;
       border: none;
       border-radius: 25px;
       font-size: 16px;
@@ -80,22 +94,28 @@
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
     }
 
-    button:hover {
+    .sidebar button:hover {
       background-color: #2980b9;
       box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
     }
 
-    footer {
-      text-align: center;
-      padding: 15px;
-      background-color: #2c3e50;
+    /* Botón para abrir/cerrar la barra lateral */
+    #toggleSidebarBtn {
+      position: absolute;
+      top: 20px;
+      left: 250px;
+      font-size: 20px;
+      background-color: #3498db;
       color: white;
-      font-size: 0.9rem;
-      position: relative;
-      bottom: 0;
-      width: 100%;
-      box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: left 0.3s ease;
+    }
+
+    .sidebar.hidden + #toggleSidebarBtn {
+      left: 20px; /* Mover el botón cuando la barra esté oculta */
     }
   </style>
 </head>
@@ -106,15 +126,18 @@
     Visualización de Polígonos por Zona de Explotación
   </header>
 
-  <!-- Contenedor del mapa -->
-  <div id="map"></div>
-  
-  <!-- Input para subir el archivo CSV -->
-  <div id="upload-csv">
+  <!-- Barra lateral -->
+  <div class="sidebar" id="sidebar">
+    <h2>Opciones</h2>
     <input type="file" id="fileInput" accept=".csv" />
-    <br />
     <button onclick="loadCSV()">Cargar CSV y Dibujar Polígonos</button>
   </div>
+
+  <!-- Botón para abrir/cerrar la barra lateral -->
+  <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+
+  <!-- Contenedor del mapa -->
+  <div id="map"></div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -122,8 +145,24 @@
   <!-- PapaParse JS para leer CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   
-  <!-- Script para leer el archivo CSV y dibujar los polígonos -->
+  <!-- Script para controlar la barra lateral y leer el archivo CSV -->
   <script>
+    // Función para alternar la visibilidad de la barra lateral
+    function toggleSidebar() {
+      var sidebar = document.getElementById('sidebar');
+      var toggleBtn = document.getElementById('toggleSidebarBtn');
+      sidebar.classList.toggle('hidden');
+
+      // Cambiar la posición del mapa cuando se oculta o muestra la barra lateral
+      if (sidebar.classList.contains('hidden')) {
+        document.getElementById('map').style.marginLeft = "0";
+        document.getElementById('map').style.width = "100%";
+      } else {
+        document.getElementById('map').style.marginLeft = "250px";
+        document.getElementById('map').style.width = "calc(100% - 250px)";
+      }
+    }
+
     // Inicializar el mapa
     var map = L.map('map').setView([28.0665, -16.7332], 13);
     
@@ -206,11 +245,6 @@
       }
     }
   </script>
-
-  <!-- Footer -->
-  <footer>
-    &copy; 2024 - Proyecto de Visualización de Polígonos por Zona de Explotación
-  </footer>
 
 </body>
 </html>
