@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mapa Interactivo con OpenStreetMap</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <!-- Estilos propios -->
+  <style>
+    #map {
+      height: 100vh; /* Altura del mapa igual a la altura completa de la ventana */
+      width: 100%; /* Ancho del mapa igual a la ventana */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Elemento div que contendrá el mapa -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <!-- Script para inicializar el mapa -->
+  <script>
+    // Inicializar el mapa y establecer la vista predeterminada
+    var map = L.map('map').setView([40.4168, -3.7038], 13); // Coordenadas de Madrid
+
+    // Cargar el mapa desde OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18,
+    }).addTo(map);
+
+    // Puedes añadir un marcador, como ejemplo:
+    var marker = L.marker([40.4168, -3.7038]).addTo(map)
+      .bindPopup('¡Hola Madrid!')
+      .openPopup();
+  </script>
+  
+</body>
+</html>
