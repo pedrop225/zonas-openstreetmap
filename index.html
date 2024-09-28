@@ -234,35 +234,4 @@
           var polygonData = JSON.parse(row['Poligon']);
           var zone = row['ZE. Zona de Explotación'];
 
-          // Asignar color si la Zona de Explotación no tiene uno asignado
-          if (!zoneColors[zone]) {
-            zoneColors[zone] = getRandomColor();
-          }
-
-          var coordinates = polygonData.coordinates[0].map(function(coord) {
-            return [coord[1], coord[0]]; // Invertimos el orden a [latitud, longitud]
-          });
-
-          // Dibujar el polígono en el mapa
-          var leafletPolygon = L.polygon(coordinates, {
-            color: zoneColors[zone],
-            fillColor: zoneColors[zone],
-            fillOpacity: 0.5
-          }).addTo(polygonLayer); // Añadir a la capa de polígonos
-          
-          // Popup informativo con la sección censal
-          leafletPolygon.bindPopup("Sección Censal: " + row['ZE. Sección Censal'] + "<br>Zona de Explotación: " + zone);
-        } catch (error) {
-          console.error("Error al procesar el polígono:", error);
-        }
-      });
-
-      // Ajustar el mapa para encuadrar todos los polígonos
-      if (polygonLayer.getLayers().length > 0) {
-        map.fitBounds(polygonLayer.getBounds());
-      }
-    }
-  </script>
-
-</body>
-</html>
+          //
