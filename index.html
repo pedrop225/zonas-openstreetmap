@@ -64,7 +64,7 @@
     .file-upload-container {
       position: relative;
       width: 100%;
-      max-width: 400px;
+      max-width: 350px; /* Reducir el tamaño del contenedor */
       text-align: center;
       margin: 0 auto;
     }
@@ -76,28 +76,39 @@
     .file-upload-button {
       background-color: #3498db;
       color: white;
-      padding: 12px 20px;
+      padding: 10px 18px; /* Botón ligeramente más pequeño */
       border: none;
-      border-radius: 25px;
-      font-size: 16px;
+      border-radius: 20px;
+      font-size: 14px; /* Reducir tamaño de la fuente */
       cursor: pointer;
       font-weight: 500;
       text-transform: uppercase;
-      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+      box-shadow: 0 4px 10px rgba(52, 152, 219, 0.2);
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
       width: 100%;
-      max-width: 400px;
     }
 
     .file-upload-button:hover {
       background-color: #2980b9;
-      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+      box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
     }
 
     .file-name {
-      margin-top: 10px;
-      font-size: 14px;
-      color: #555;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #666;
+      font-weight: 400;
+      font-style: italic;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-name i {
+      margin-right: 8px;
+      font-size: 1.2rem;
+      color: #3498db;
     }
 
     /* Botón para abrir/cerrar la barra lateral */
@@ -133,7 +144,7 @@
     <div class="file-upload-container">
       <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
       <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="handleFileSelection()" />
-      <p class="file-name" id="fileName">No se ha seleccionado ningún archivo</p>
+      <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i>No se ha seleccionado ningún archivo</p>
     </div>
   </div>
 
@@ -149,6 +160,9 @@
   <!-- PapaParse JS para leer CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   
+  <!-- Iconos de FontAwesome -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
   <!-- Script para controlar la barra lateral y leer el archivo CSV -->
   <script>
     // Función para alternar la visibilidad de la barra lateral
@@ -173,7 +187,7 @@
       var fileName = document.getElementById('fileName');
       
       // Mostrar el nombre del archivo
-      fileName.textContent = fileInput.files.length ? fileInput.files[0].name : "No se ha seleccionado ningún archivo";
+      fileName.innerHTML = fileInput.files.length ? `<i class="fas fa-file-csv"></i> ${fileInput.files[0].name}` : `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
       
       // Cargar los datos automáticamente
       if (fileInput.files.length) {
@@ -234,4 +248,35 @@
           var polygonData = JSON.parse(row['Poligon']);
           var zone = row['ZE. Zona de Explotación'];
 
-          //
+          // Asignar color si la Zona de Explotación no tiene uno asignado
+          if (!zoneColors[zone]) {
+            zoneColors[zone] = getRandomColor();
+          }
+
+          var coordinates = polygonData.coordinates[0].map(function(coord) {
+            return [coord[1], coord[0]]; // Invertimos el orden a [latitud, longitud]
+          });
+
+          // Dibujar el polígono en el mapa
+          var leafletPolygon = L.polygon(coordinates, {
+            color: zoneColors[zone],
+            fillColor: zoneColors[zone],
+            fillOpacity: 0.5
+          }).addTo(polygonLayer); // Añadir a la capa de polígonos
+          
+          // Popup informativo con la sección censal
+          leafletPolygon.bindPopup("Sección Censal: " + row['ZE. Sección Censal'] + "<br>Zona de Explotación: " + zone);
+        } catch (error) {
+          console.error("Error al procesar el polígono:", error);
+        }
+      });
+
+      // Ajustar el mapa para encuadrar todos los polígonos
+      if (polygonLayer.getLayers().length > 0) {
+        map.fitBounds(polygonLayer.getBounds());
+      }
+    }
+  </script>
+
+</body>
+</html>
