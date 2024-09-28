@@ -58,6 +58,7 @@
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       transform: translateX(-180px); /* Estado inicial oculto */
       transition: transform 0.3s ease;
+      z-index: 999; /* Asegurar que esté por encima del contenido */
     }
 
     .sidebar.visible {
@@ -119,7 +120,7 @@
 
     /* Botón para abrir/cerrar la barra lateral */
     #toggleSidebarBtn {
-      position: absolute;
+      position: fixed; /* Cambiar a fixed para que siempre sea visible */
       top: 100px; /* Ajustado para estar debajo del header */
       left: 20px; /* Estado inicial con la barra lateral oculta */
       font-size: 18px; /* Aumentamos el tamaño de la fuente */
@@ -129,6 +130,7 @@
       border: none;
       cursor: pointer;
       border-radius: 5px;
+      z-index: 1001; /* Asegurar que esté por encima del contenido */
       transition: left 0.3s ease;
     }
 
