@@ -46,6 +46,9 @@
       maxZoom: 18,
     }).addTo(map);
 
+    // Capa de polígonos para agrupar todos los polígonos dibujados
+    var polygonLayer = L.featureGroup().addTo(map);
+
     // Función para leer el archivo CSV
     function loadCSV() {
       var fileInput = document.getElementById('fileInput');
@@ -65,6 +68,9 @@
 
     // Función para procesar los datos del CSV y dibujar los polígonos
     function processCSVData(data) {
+      // Limpiar la capa de polígonos antes de dibujar nuevos
+      polygonLayer.clearLayers();
+
       data.forEach(function(row) {
         try {
           var polygonData = JSON.parse(row['Poligon']);
@@ -77,7 +83,7 @@
             color: 'blue',
             fillColor: '#3388ff',
             fillOpacity: 0.5
-          }).addTo(map);
+          }).addTo(polygonLayer); // Añadir a la capa de polígonos
           
           // Popup informativo con la sección censal
           leafletPolygon.bindPopup("Sección Censal: " + row['ZE. Sección Censal']);
@@ -85,6 +91,11 @@
           console.error("Error al procesar el polígono:", error);
         }
       });
+
+      // Ajustar el mapa para encuadrar todos los polígonos
+      if (polygonLayer.getLayers().length > 0) {
+        map.fitBounds(polygonLayer.getBounds());
+      }
     }
   </script>
 
