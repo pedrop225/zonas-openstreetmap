@@ -1,63 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mapa Interactivo con Polígonos en OpenStreetMap</title>
+  <title>Mapa con Polígonos desde Datos</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-
+  
   <!-- Estilos propios -->
   <style>
     #map {
-      height: 100vh; /* Altura del mapa igual a la altura completa de la ventana */
-      width: 100%; /* Ancho del mapa igual a la ventana */
+      height: 100vh;
+      width: 100%;
     }
   </style>
 </head>
 <body>
-
-  <!-- Elemento div que contendrá el mapa -->
+  
+  <!-- Contenedor del mapa -->
   <div id="map"></div>
-
+  
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-  <!-- Script para inicializar el mapa -->
+  
+  <!-- Script para inicializar el mapa y añadir los polígonos -->
   <script>
-    // Inicializar el mapa con una vista general (no es necesario centrarlo aún)
-    var map = L.map('map').setView([40.4168, -3.7038], 13); // Vista inicial en Madrid
-
-    // Cargar el mapa desde OpenStreetMap tiles
+    // Inicializar el mapa
+    var map = L.map('map').setView([28.0665, -16.7332], 13); // Centrado inicial en las coordenadas del primer polígono
+    
+    // Cargar mapa desde OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 18,
     }).addTo(map);
 
-    // Definir las coordenadas del polígono
-    var polygonCoords = [
-      [40.4178, -3.7124],  // Coordenada 1
-      [40.4185, -3.7038],  // Coordenada 2
-      [40.4128, -3.7034],  // Coordenada 3
-      [40.4122, -3.7110]   // Coordenada 4
+    // Datos de los polígonos
+    var polygonsData = [
+      {
+        "section_censal": 3800101007,
+        "coordinates": [
+          [-16.73322498784285, 28.0665583236078],
+          [-16.72732099796566, 28.06597845873892],
+          [-16.72162431710848, 28.06659155265807],
+          [-16.72158690531136, 28.06673866735565],
+          [-16.72922223941475, 28.07468836037956],
+          [-16.72918808855939, 28.09031765123864],
+          [-16.73562539889297, 28.0914862725735],
+          [-16.73855274970958, 28.08748055368468],
+          [-16.73322498784285, 28.0665583236078]
+        ]
+      }
+      // Agregar más polígonos de forma similar
     ];
 
-    // Crear y añadir el polígono al mapa
-    var polygon = L.polygon(polygonCoords, {
-      color: 'blue',  // Color del borde
-      fillColor: '#3388ff',  // Color de relleno
-      fillOpacity: 0.4,  // Opacidad del relleno
-      weight: 2,  // Grosor del borde
-    }).addTo(map);
-
-    // Añadir un popup al polígono
-    polygon.bindPopup("Este es un polígono en Madrid.");
-
-    // Ajustar la vista del mapa para que el polígono sea visible
-    map.fitBounds(polygon.getBounds());
-
+    // Añadir polígonos al mapa
+    polygonsData.forEach(function(polygon) {
+      var coordinates = polygon.coordinates.map(function(coord) {
+        return [coord[1], coord[0]]; // Invertimos el orden a [latitud, longitud]
+      });
+      
+      var leafletPolygon = L.polygon(coordinates, {
+        color: 'blue',
+        fillColor: '#3388ff',
+        fillOpacity: 0.5
+      }).addTo(map);
+      
+      leafletPolygon.bindPopup("Sección Censal: " + polygon.section_censal);
+    });
   </script>
-
+  
 </body>
 </html>
