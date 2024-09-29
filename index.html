@@ -243,8 +243,9 @@
   <script>
     const vInicialSwitch = document.getElementById('vInicialSwitch');
     const vFinalSwitch = document.getElementById('vFinalSwitch');
-    const mapContainer = document.getElementById('mapContainer');
     const mapElement = document.getElementById('map');
+
+    let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     vInicialSwitch.addEventListener('change', handleSwitchChange);
     vFinalSwitch.addEventListener('change', handleSwitchChange);
@@ -259,8 +260,10 @@
         }
       }
 
-      // Redibujar el mapa con la columna seleccionada
-      loadCSV();
+      // Redibujar el mapa en función de la columna seleccionada
+      if (csvData) {
+        processCSVData(csvData);
+      }
     }
 
     // Inicializar el mapa
@@ -280,28 +283,22 @@
       fileName.innerHTML = fileInput.files.length ? `<i class="fas fa-file-csv"></i> ${fileInput.files[0].name}` : `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
       
       if (fileInput.files.length) {
-        loadCSV();
+        loadCSV(fileInput.files[0]);
       }
     }
 
-    function loadCSV() {
-      var fileInput = document.getElementById('fileInput');
-      var file = fileInput.files[0];
-
-      if (file) {
-        Papa.parse(file, {
-          header: true,
-          complete: function(results) {
-            processCSVData(results.data);
-          }
-        });
-      } else {
-        alert("Por favor, selecciona un archivo CSV.");
-      }
+    function loadCSV(file) {
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          csvData = results.data; // Guardar los datos en memoria
+          processCSVData(csvData); // Procesar los datos para dibujar el mapa
+        }
+      });
     }
 
     function processCSVData(data) {
-      polygonLayer.clearLayers();
+      polygonLayer.clearLayers(); // Limpiar los polígonos anteriores
 
       // Decidir qué columna usar según el interruptor activado
       var zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
@@ -312,7 +309,7 @@
           var zone = row[zoneColumn];
 
           var coordinates = polygonData.coordinates[0].map(function(coord) {
-            return [coord[1], coord[0]];
+            return [coord[1], coord[0]]; // Invertir latitud y longitud
           });
 
           var leafletPolygon = L.polygon(coordinates, {
@@ -349,7 +346,7 @@
 
     // Configuración inicial: mostrar solo el mapa inicial
     document.addEventListener('DOMContentLoaded', function () {
-      vFinalSwitch.checked = false; // Solo "V. Inicial" encendido
+      vFinalSwitch.checked = false; // Solo "V. Inicial" encendido al principio
     });
   </script>
 
