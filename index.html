@@ -304,14 +304,14 @@
 
     function processCSVData(data) {
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-      const polColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
+      const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
       data.forEach(function(row) {
         try {
           const polygonData = JSON.parse(row['Poligon']);
           const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
           const zone = row[zoneColumn];
-          const poliza = row[polColumn];  // Póliza basada en el interruptor
+          const poliza = row[polizaColumn];  // Seleccionar póliza según interruptor
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
@@ -328,7 +328,7 @@
               weight: 5,
               color: '#666',
               fillOpacity: 0.7,
-              fillColor: getColorForZone(zone) // Asegurar que el color no cambie al pasar el ratón
+              fillColor: getColorForZone(zone)
             });
           });
 
@@ -340,7 +340,7 @@
             });
           });
 
-          // Mostrar en el popup la información relevante: Sección Censal, Zona y Póliza
+          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación y Póliza
           leafletPolygon.bindPopup(`
             <b>Sección Censal:</b> ${sectionCensal}<br>
             <b>Zona de Explotación:</b> ${zone}<br>
