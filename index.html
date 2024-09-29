@@ -193,6 +193,12 @@
     input:checked + .slider:before {
       transform: translateX(14px);
     }
+
+    /* Ajuste de posición para los controles del mapa para evitar solapamiento con la barra lateral */
+    .leaflet-top.leaflet-left {
+      left: 50px; /* Ajustar para evitar la superposición con la barra lateral */
+      transition: left 0.3s ease;
+    }
   </style>
 </head>
 <body>
@@ -243,6 +249,8 @@
     const vInicialSwitch = document.getElementById('vInicialSwitch');
     const vFinalSwitch = document.getElementById('vFinalSwitch');
     const mapElement = document.getElementById('map');
+    const sidebar = document.getElementById('sidebar');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
 
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
@@ -337,8 +345,16 @@
     }
 
     function toggleSidebar() {
-      var sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('visible');
+
+      // Ajustar la posición de los controles del mapa cuando se muestra/oculta la barra lateral
+      if (sidebar.classList.contains('visible')) {
+        map.getContainer().classList.add('sidebar-visible');
+        document.querySelector('.leaflet-top.leaflet-left').style.left = '230px'; // Ajustar cuando la barra esté visible
+      } else {
+        map.getContainer().classList.remove('sidebar-visible');
+        document.querySelector('.leaflet-top.leaflet-left').style.left = '50px';  // Ajustar cuando la barra esté oculta
+      }
     }
 
     // Configuración inicial: solo "V. Inicial" activado
