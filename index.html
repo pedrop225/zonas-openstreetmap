@@ -54,8 +54,6 @@
     }
 
     .map-container {
-      display: flex;
-      justify-content: space-between;
       height: calc(100vh - 80px);
       margin-top: 80px;
     }
@@ -64,11 +62,6 @@
       width: 100%;
       height: 100%;
       margin: 0;
-      transition: width 0.3s ease;
-    }
-
-    .half-map {
-      width: 50%;
     }
 
     .sidebar {
@@ -236,20 +229,10 @@
       <span class="switch-label">V. Final</span>
     </div>
 
-    <!-- Switch Comparativa -->
-    <div class="switch-container">
-      <label class="switch">
-        <input type="checkbox" id="comparativaSwitch">
-        <span class="slider"></span>
-      </label>
-      <span class="switch-label">Comparativa</span>
-    </div>
-
   </div>
 
   <div id="mapContainer" class="map-container">
     <div id="map" class="map"></div>
-    <div id="map2" class="map"></div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -259,28 +242,19 @@
   <script>
     const vInicialSwitch = document.getElementById('vInicialSwitch');
     const vFinalSwitch = document.getElementById('vFinalSwitch');
-    const comparativaSwitch = document.getElementById('comparativaSwitch');
-    const mapContainer = document.getElementById('mapContainer');
     const mapElement = document.getElementById('map');
-    const mapElement2 = document.getElementById('map2');
 
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     vInicialSwitch.addEventListener('change', handleSwitchChange);
     vFinalSwitch.addEventListener('change', handleSwitchChange);
-    comparativaSwitch.addEventListener('change', handleSwitchChange);
 
     function handleSwitchChange() {
       // Asegurarnos de que solo un interruptor esté activo
       if (this === vInicialSwitch && vInicialSwitch.checked) {
         vFinalSwitch.checked = false;
-        comparativaSwitch.checked = false;
       } else if (this === vFinalSwitch && vFinalSwitch.checked) {
         vInicialSwitch.checked = false;
-        comparativaSwitch.checked = false;
-      } else if (this === comparativaSwitch && comparativaSwitch.checked) {
-        vInicialSwitch.checked = false;
-        vFinalSwitch.checked = false;
       }
 
       // Redibujar el mapa según el interruptor activado
@@ -289,22 +263,15 @@
       }
     }
 
-    // Inicializar los mapas
+    // Inicializar el mapa
     let map = L.map('map').setView([28.0665, -16.7332], 13);
-    let map2 = L.map('map2').setView([28.0665, -16.7332], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
       maxZoom: 18,
     }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
-      maxZoom: 18,
-    }).addTo(map2);
-
     var polygonLayer = L.featureGroup().addTo(map);
-    var polygonLayer2 = L.featureGroup().addTo(map2);
 
     function handleFileSelection() {
       var fileInput = document.getElementById('fileInput');
@@ -329,29 +296,10 @@
 
     function processCSVData(data) {
       polygonLayer.clearLayers(); // Limpiar los polígonos anteriores
-      polygonLayer2.clearLayers(); // Limpiar los polígonos en el segundo mapa si está activo
 
       // Determinar la columna que se debe utilizar según el interruptor activo
-      if (vInicialSwitch.checked) {
-        drawPolygons(data, 'ZE. Zona de Explotación', map, polygonLayer);
-        mapContainer.style.display = 'block';  // Solo un mapa
-        mapElement2.style.display = 'none';   // Ocultar el segundo mapa
-      } else if (vFinalSwitch.checked) {
-        drawPolygons(data, 'Nueva Zona', map, polygonLayer);
-        mapContainer.style.display = 'block';  // Solo un mapa
-        mapElement2.style.display = 'none';   // Ocultar el segundo mapa
-      } else if (comparativaSwitch.checked) {
-        // Mostrar dos mapas, uno con 'ZE. Zona de Explotación' y otro con 'Nueva Zona'
-        mapContainer.style.display = 'flex';  // Mostrar ambos mapas
-        mapElement2.style.display = 'block';  // Mostrar el segundo mapa
-        mapElement.classList.add('half-map'); // Ajustar el tamaño de ambos mapas
-        mapElement2.classList.add('half-map');
-        drawPolygons(data, 'ZE. Zona de Explotación', map, polygonLayer);
-        drawPolygons(data, 'Nueva Zona', map2, polygonLayer2);
-      }
-    }
+      var zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
 
-    function drawPolygons(data, zoneColumn, map, polygonLayer) {
       data.forEach(function(row) {
         try {
           var polygonData = JSON.parse(row['Poligon']);
@@ -396,8 +344,6 @@
     // Configuración inicial: solo "V. Inicial" activado
     document.addEventListener('DOMContentLoaded', function () {
       vFinalSwitch.checked = false;
-      comparativaSwitch.checked = false;
-      mapElement2.style.display = 'none'; // Ocultar el segundo mapa al inicio
     });
   </script>
 
