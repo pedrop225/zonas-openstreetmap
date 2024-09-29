@@ -326,7 +326,7 @@
               weight: 5,
               color: '#666',
               fillOpacity: 0.7,
-              fillColor: getColorForZone(zone)
+              fillColor: getColorForZone(zone) // Asegurar que el color no cambie al pasar el ratón
             });
           });
 
@@ -338,11 +338,7 @@
             });
           });
 
-          // Mostrar en el popup la información relevante: Sección Censal y Zona de Explotación
-          leafletPolygon.bindPopup(`
-            <b>Sección Censal:</b> ${sectionCensal}<br>
-            <b>Zona de Explotación:</b> ${zone}
-          `);
+          leafletPolygon.bindPopup(`<b>Sección Censal:</b> ${sectionCensal}<br><b>Zona de Explotación:</b> ${zone}`);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
         }
