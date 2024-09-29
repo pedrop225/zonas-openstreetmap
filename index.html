@@ -139,15 +139,14 @@
     .switch-container {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       margin-bottom: 15px;
       color: white;
-      margin-left: -10px; /* Mover los interruptores ligeramente a la izquierda */
     }
 
     .switch-label {
       font-size: 14px;
       font-weight: bold; /* Poner los labels en negrita */
+      margin-left: 10px; /* Separar el label del interruptor */
     }
 
     .switch {
@@ -223,20 +222,20 @@
 
     <!-- Switch V. Inicial -->
     <div class="switch-container">
-      <span class="switch-label">V. Inicial</span>
       <label class="switch">
         <input type="checkbox" id="vInicialSwitch">
         <span class="slider"></span>
       </label>
+      <span class="switch-label">V. Inicial</span>
     </div>
 
     <!-- Switch V. Final -->
     <div class="switch-container">
-      <span class="switch-label">V. Final</span>
       <label class="switch">
         <input type="checkbox" id="vFinalSwitch">
         <span class="slider"></span>
       </label>
+      <span class="switch-label">V. Final</span>
     </div>
 
   </div>
