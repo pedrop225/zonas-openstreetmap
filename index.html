@@ -267,6 +267,7 @@
 
       // Redibujar el mapa según el interruptor activado
       if (csvData) {
+        clearMap();  // Limpiar los polígonos antes de dibujar nuevamente
         processCSVData(csvData);
       }
     }
@@ -297,14 +298,13 @@
         header: true,
         complete: function(results) {
           csvData = results.data; // Guardar los datos en memoria
+          clearMap(); // Limpiar los polígonos antes de dibujar
           processCSVData(csvData); // Procesar los datos para dibujar el mapa
         }
       });
     }
 
     function processCSVData(data) {
-      polygonLayer.clearLayers(); // Limpiar los polígonos anteriores
-
       // Determinar la columna que se debe utilizar según el interruptor activo
       var zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
 
@@ -333,6 +333,11 @@
       if (polygonLayer.getLayers().length > 0) {
         map.fitBounds(polygonLayer.getBounds());
       }
+    }
+
+    // Limpiar los polígonos del mapa
+    function clearMap() {
+      polygonLayer.clearLayers();  // Esta función elimina todos los polígonos existentes antes de agregar nuevos
     }
 
     // Generar colores fijos para cada zona
