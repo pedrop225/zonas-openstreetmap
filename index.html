@@ -54,8 +54,6 @@
     }
 
     .map-container {
-      display: flex;
-      justify-content: space-between;
       height: calc(100vh - 80px);
       margin-top: 80px;
     }
@@ -65,10 +63,6 @@
       height: 100%;
       margin: 0;
       transition: width 0.3s ease;
-    }
-
-    .half-map {
-      width: 50%;
     }
 
     .sidebar {
@@ -240,7 +234,6 @@
 
   <div id="mapContainer" class="map-container">
     <div id="map" class="map"></div>
-    <div id="map2" class="map"></div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -252,7 +245,6 @@
     const vFinalSwitch = document.getElementById('vFinalSwitch');
     const mapContainer = document.getElementById('mapContainer');
     const mapElement = document.getElementById('map');
-    const mapElement2 = document.getElementById('map2');
 
     vInicialSwitch.addEventListener('change', handleSwitchChange);
     vFinalSwitch.addEventListener('change', handleSwitchChange);
@@ -267,40 +259,19 @@
         }
       }
 
-      // Si ambos están encendidos, mostrar ambos mapas
-      if (vInicialSwitch.checked && vFinalSwitch.checked) {
-        mapContainer.style.display = 'flex';
-        mapElement.classList.add('half-map');
-        mapElement2.classList.add('half-map');
-        mapElement2.style.display = 'block';
-      } else {
-        // Si solo uno está encendido, mostrar un solo mapa
-        mapContainer.style.display = 'block';
-        mapElement.classList.remove('half-map');
-        mapElement2.classList.remove('half-map');
-        mapElement2.style.display = 'none';
-      }
-      
-      // Redibujar mapas en función de la opción seleccionada
+      // Redibujar el mapa con la columna seleccionada
       loadCSV();
     }
 
-    // Inicializar los mapas
+    // Inicializar el mapa
     let map = L.map('map').setView([28.0665, -16.7332], 13);
-    let map2 = L.map('map2').setView([28.0665, -16.7332], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
       maxZoom: 18,
     }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
-      maxZoom: 18,
-    }).addTo(map2);
-
     var polygonLayer = L.featureGroup().addTo(map);
-    var polygonLayer2 = L.featureGroup().addTo(map2);
 
     function handleFileSelection() {
       var fileInput = document.getElementById('fileInput');
@@ -331,33 +302,44 @@
 
     function processCSVData(data) {
       polygonLayer.clearLayers();
-      polygonLayer2.clearLayers();
+
+      // Decidir qué columna usar según el interruptor activado
+      var zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
 
       data.forEach(function(row) {
-        var polygonData = JSON.parse(row['Poligon']);
-        var zoneColumn = vInicialSwitch.checked && !vFinalSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+        try {
+          var polygonData = JSON.parse(row['Poligon']);
+          var zone = row[zoneColumn];
 
-        var coordinates = polygonData.coordinates[0].map(function(coord) {
-          return [coord[1], coord[0]];
-        });
+          var coordinates = polygonData.coordinates[0].map(function(coord) {
+            return [coord[1], coord[0]];
+          });
 
-        var leafletPolygon = L.polygon(coordinates, {
-          color: '#3388ff',
-          fillColor: '#3388ff',
-          fillOpacity: 0.5
-        }).addTo(polygonLayer);
-
-        if (vInicialSwitch.checked && vFinalSwitch.checked) {
-          var leafletPolygon2 = L.polygon(coordinates, {
-            color: '#ff0000',
-            fillColor: '#ff0000',
+          var leafletPolygon = L.polygon(coordinates, {
+            color: getRandomColor(zone),
+            fillColor: getRandomColor(zone),
             fillOpacity: 0.5
-          }).addTo(polygonLayer2);
-        }
+          }).addTo(polygonLayer);
 
-        map.fitBounds(polygonLayer.getBounds());
-        map2.fitBounds(polygonLayer2.getBounds());
+          leafletPolygon.bindPopup("Zona de Explotación: " + zone);
+        } catch (error) {
+          console.error("Error al procesar el polígono:", error);
+        }
       });
+
+      // Ajustar el mapa para encuadrar todos los polígonos
+      if (polygonLayer.getLayers().length > 0) {
+        map.fitBounds(polygonLayer.getBounds());
+      }
+    }
+
+    // Generar colores fijos para cada zona
+    var zoneColors = {};
+    function getRandomColor(zone) {
+      if (!zoneColors[zone]) {
+        zoneColors[zone] = '#' + Math.floor(Math.random() * 16777215).toString(16);
+      }
+      return zoneColors[zone];
     }
 
     function toggleSidebar() {
@@ -367,7 +349,7 @@
 
     // Configuración inicial: mostrar solo el mapa inicial
     document.addEventListener('DOMContentLoaded', function () {
-      mapElement2.style.display = 'none';
+      vFinalSwitch.checked = false; // Solo "V. Inicial" encendido
     });
   </script>
 
