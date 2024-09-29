@@ -230,7 +230,7 @@
     <!-- Switch V. Final -->
     <div class="switch-container">
       <label class="switch">
-        <input type="checkbox" id="vFinalSwitch" checked>
+        <input type="checkbox" id="vFinalSwitch">
         <span class="slider"></span>
       </label>
       <span class="switch-label">V. Final</span>
@@ -364,6 +364,11 @@
       var sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('visible');
     }
+
+    // Configuración inicial: mostrar solo el mapa inicial
+    document.addEventListener('DOMContentLoaded', function () {
+      mapElement2.style.display = 'none';
+    });
   </script>
 
 </body>
