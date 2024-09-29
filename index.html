@@ -312,6 +312,7 @@
           const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
           const zone = row[zoneColumn];
           const poliza = row[polizaColumn];  // Seleccionar póliza según interruptor
+          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];  // Siempre se muestra esta columna
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
@@ -340,10 +341,11 @@
             });
           });
 
-          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación y Póliza
+          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación, Poliza ZE. Sección Censal y Póliza
           leafletPolygon.bindPopup(`
             <b>Sección Censal:</b> ${sectionCensal}<br>
             <b>Zona de Explotación:</b> ${zone}<br>
+            <b>Poliza ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
             <b>Póliza:</b> ${poliza}
           `);
         } catch (error) {
