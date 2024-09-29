@@ -248,27 +248,25 @@
   <script>
     const vInicialSwitch = document.getElementById('vInicialSwitch');
     const vFinalSwitch = document.getElementById('vFinalSwitch');
-    const mapElement = document.getElementById('map');
     const sidebar = document.getElementById('sidebar');
-    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     vInicialSwitch.addEventListener('change', handleSwitchChange);
     vFinalSwitch.addEventListener('change', handleSwitchChange);
 
     function handleSwitchChange() {
-      // Asegurarnos de que solo un interruptor esté activo
+      // Garantizamos que solo un interruptor esté activo
       if (this === vInicialSwitch && vInicialSwitch.checked) {
         vFinalSwitch.checked = false;
       } else if (this === vFinalSwitch && vFinalSwitch.checked) {
         vInicialSwitch.checked = false;
       }
 
-      // Redibujar el mapa según el interruptor activado
       if (csvData) {
         clearMap();  // Limpiar los polígonos antes de dibujar nuevamente
-        processCSVData(csvData);  // Llamada para redibujar los polígonos
+        processCSVData(csvData);  // Redibujar polígonos
       }
     }
 
@@ -282,14 +280,14 @@
 
     var polygonLayer = L.featureGroup().addTo(map);
 
+    fileInput.addEventListener('change', handleFileSelection);
+
     function handleFileSelection() {
-      var fileInput = document.getElementById('fileInput');
-      var fileName = document.getElementById('fileName');
-      
-      fileName.innerHTML = fileInput.files.length ? `<i class="fas fa-file-csv"></i> ${fileInput.files[0].name}` : `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
-      
       if (fileInput.files.length) {
+        fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${fileInput.files[0].name}`;
         loadCSV(fileInput.files[0]);
+      } else {
+        fileName.innerHTML = `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
       }
     }
 
@@ -297,7 +295,7 @@
       Papa.parse(file, {
         header: true,
         complete: function(results) {
-          csvData = results.data; // Guardar los datos en memoria
+          csvData = results.data;
           clearMap(); // Limpiar los polígonos antes de dibujar
           processCSVData(csvData); // Procesar los datos para dibujar el mapa
         }
@@ -305,32 +303,23 @@
     }
 
     function processCSVData(data) {
-      polygonLayer.clearLayers(); // Asegurarse de que se borran los polígonos antes de dibujar los nuevos
-
       // Determinar la columna que se debe utilizar según el interruptor activo
-      let zoneColumn;
-      if (vInicialSwitch.checked) {
-        zoneColumn = 'ZE. Zona de Explotación';
-      } else if (vFinalSwitch.checked) {
-        zoneColumn = 'Nueva Zona'; // Este bloque asegura que si V. Final está activo, se utiliza 'Nueva Zona'
-      }
+      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
 
       data.forEach(function(row) {
         try {
-          var polygonData = JSON.parse(row['Poligon']);
-          var zone = row[zoneColumn]; // Elegimos la columna correcta según el interruptor activo
+          const polygonData = JSON.parse(row['Poligon']);
+          const zone = row[zoneColumn];
 
-          var coordinates = polygonData.coordinates[0].map(function(coord) {
-            return [coord[1], coord[0]]; // Invertir latitud y longitud
-          });
+          const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
-          var leafletPolygon = L.polygon(coordinates, {
-            color: getRandomColor(zone),
-            fillColor: getRandomColor(zone),
+          const leafletPolygon = L.polygon(coordinates, {
+            color: getColorForZone(zone),
+            fillColor: getColorForZone(zone),
             fillOpacity: 0.5
           }).addTo(polygonLayer);
 
-          leafletPolygon.bindPopup("Zona: " + zone);
+          leafletPolygon.bindPopup(`Zona: ${zone}`);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
         }
@@ -348,10 +337,10 @@
     }
 
     // Generar colores fijos para cada zona
-    var zoneColors = {};
-    function getRandomColor(zone) {
+    const zoneColors = {};
+    function getColorForZone(zone) {
       if (!zoneColors[zone]) {
-        zoneColors[zone] = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        zoneColors[zone] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
       }
       return zoneColors[zone];
     }
@@ -360,19 +349,20 @@
       sidebar.classList.toggle('visible');
 
       // Ajustar la posición de los controles del mapa cuando se muestra/oculta la barra lateral
+      const mapContainer = map.getContainer();
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
+
       if (sidebar.classList.contains('visible')) {
-        map.getContainer().classList.add('sidebar-visible');
-        document.querySelector('.leaflet-top.leaflet-left').style.left = '230px'; // Ajustar cuando la barra esté visible
+        mapContainer.classList.add('sidebar-visible');
+        leafletControls.style.left = '230px'; // Ajustar cuando la barra esté visible
       } else {
-        map.getContainer().classList.remove('sidebar-visible');
-        document.querySelector('.leaflet-top.leaflet-left').style.left = '50px';  // Ajustar cuando la barra esté oculta
+        mapContainer.classList.remove('sidebar-visible');
+        leafletControls.style.left = '50px';  // Ajustar cuando la barra esté oculta
       }
     }
 
     // Configuración inicial: solo "V. Inicial" activado
-    document.addEventListener('DOMContentLoaded', function () {
-      vFinalSwitch.checked = false;
-    });
+    document.addEventListener('DOMContentLoaded', () => vFinalSwitch.checked = false);
   </script>
 
 </body>
