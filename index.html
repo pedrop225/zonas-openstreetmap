@@ -213,7 +213,7 @@
     
     <div class="file-upload-container">
       <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
-      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" onchange="handleFileSelection()" />
+      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" />
       <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i>No se ha seleccionado ningún archivo</p>
     </div>
 
@@ -253,11 +253,11 @@
     const fileName = document.getElementById('fileName');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
+    // Manejar cambios de interruptores
     vInicialSwitch.addEventListener('change', handleSwitchChange);
     vFinalSwitch.addEventListener('change', handleSwitchChange);
 
     function handleSwitchChange() {
-      // Garantizamos que solo un interruptor esté activo
       if (this === vInicialSwitch && vInicialSwitch.checked) {
         vFinalSwitch.checked = false;
       } else if (this === vFinalSwitch && vFinalSwitch.checked) {
@@ -303,13 +303,13 @@
     }
 
     function processCSVData(data) {
-      // Determinar la columna que se debe utilizar según el interruptor activo
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
 
       data.forEach(function(row) {
         try {
           const polygonData = JSON.parse(row['Poligon']);
           const zone = row[zoneColumn];
+          const zoneCensal = row['Zona Censal'];  // Suponiendo que esta columna está en el CSV
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
@@ -319,13 +319,29 @@
             fillOpacity: 0.5
           }).addTo(polygonLayer);
 
-          leafletPolygon.bindPopup(`Zona: ${zone}`);
+          // Agregar animaciones y mostrar información al pasar el ratón
+          leafletPolygon.on('mouseover', function () {
+            this.setStyle({
+              weight: 5,
+              color: '#666',
+              fillOpacity: 0.7
+            });
+          });
+
+          leafletPolygon.on('mouseout', function () {
+            this.setStyle({
+              weight: 2,
+              color: getColorForZone(zone),
+              fillOpacity: 0.5
+            });
+          });
+
+          leafletPolygon.bindPopup(`<b>Zona Censal:</b> ${zoneCensal}<br><b>Zona Asignada:</b> ${zone}`);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
         }
       });
 
-      // Ajustar el mapa para encuadrar todos los polígonos
       if (polygonLayer.getLayers().length > 0) {
         map.fitBounds(polygonLayer.getBounds());
       }
@@ -333,7 +349,7 @@
 
     // Limpiar los polígonos del mapa
     function clearMap() {
-      polygonLayer.clearLayers();  // Esta función elimina todos los polígonos existentes antes de agregar nuevos
+      polygonLayer.clearLayers();  // Elimina todos los polígonos existentes antes de agregar nuevos
     }
 
     // Generar colores fijos para cada zona
@@ -348,15 +364,10 @@
     function toggleSidebar() {
       sidebar.classList.toggle('visible');
 
-      // Ajustar la posición de los controles del mapa cuando se muestra/oculta la barra lateral
-      const mapContainer = map.getContainer();
       const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
-
       if (sidebar.classList.contains('visible')) {
-        mapContainer.classList.add('sidebar-visible');
         leafletControls.style.left = '230px'; // Ajustar cuando la barra esté visible
       } else {
-        mapContainer.classList.remove('sidebar-visible');
         leafletControls.style.left = '50px';  // Ajustar cuando la barra esté oculta
       }
     }
