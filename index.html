@@ -308,15 +308,16 @@
       data.forEach(function(row) {
         try {
           const polygonData = JSON.parse(row['Poligon']);
+          const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
           const zone = row[zoneColumn];
-          const zoneCensal = row['Zona Censal'];  // Suponiendo que esta columna está en el CSV
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
           const leafletPolygon = L.polygon(coordinates, {
             color: getColorForZone(zone),
             fillColor: getColorForZone(zone),
-            fillOpacity: 0.5
+            fillOpacity: 0.5,
+            weight: 2
           }).addTo(polygonLayer);
 
           // Agregar animaciones y mostrar información al pasar el ratón
@@ -324,7 +325,8 @@
             this.setStyle({
               weight: 5,
               color: '#666',
-              fillOpacity: 0.7
+              fillOpacity: 0.7,
+              fillColor: getColorForZone(zone) // Asegurar que el color no cambie al pasar el ratón
             });
           });
 
@@ -336,7 +338,7 @@
             });
           });
 
-          leafletPolygon.bindPopup(`<b>Zona Censal:</b> ${zoneCensal}<br><b>Zona Asignada:</b> ${zone}`);
+          leafletPolygon.bindPopup(`<b>Sección Censal:</b> ${sectionCensal}<br><b>Zona de Explotación:</b> ${zone}`);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
         }
