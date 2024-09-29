@@ -268,7 +268,7 @@
       // Redibujar el mapa según el interruptor activado
       if (csvData) {
         clearMap();  // Limpiar los polígonos antes de dibujar nuevamente
-        processCSVData(csvData);
+        processCSVData(csvData);  // Llamada para redibujar los polígonos
       }
     }
 
@@ -305,13 +305,20 @@
     }
 
     function processCSVData(data) {
+      polygonLayer.clearLayers(); // Asegurarse de que se borran los polígonos antes de dibujar los nuevos
+
       // Determinar la columna que se debe utilizar según el interruptor activo
-      var zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+      let zoneColumn;
+      if (vInicialSwitch.checked) {
+        zoneColumn = 'ZE. Zona de Explotación';
+      } else if (vFinalSwitch.checked) {
+        zoneColumn = 'Nueva Zona'; // Este bloque asegura que si V. Final está activo, se utiliza 'Nueva Zona'
+      }
 
       data.forEach(function(row) {
         try {
           var polygonData = JSON.parse(row['Poligon']);
-          var zone = row[zoneColumn];
+          var zone = row[zoneColumn]; // Elegimos la columna correcta según el interruptor activo
 
           var coordinates = polygonData.coordinates[0].map(function(coord) {
             return [coord[1], coord[0]]; // Invertir latitud y longitud
