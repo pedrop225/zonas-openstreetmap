@@ -304,24 +304,12 @@
 
     function processCSVData(data) {
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-      const polColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
       data.forEach(function(row) {
         try {
-          if (!row['Poligon'] || !row[zoneColumn] || !row[polColumn]) {
-            console.error('Faltan columnas esperadas en el archivo CSV.');
-            return;
-          }
-
           const polygonData = JSON.parse(row['Poligon']);
           const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
           const zone = row[zoneColumn];
-          const poliza = row[polColumn];  // Póliza basada en el interruptor
-
-          if (!polygonData || !polygonData.coordinates) {
-            console.error('El formato del polígono es incorrecto.');
-            return;
-          }
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
@@ -332,7 +320,7 @@
             weight: 2
           }).addTo(polygonLayer);
 
-          // Animaciones de hover
+          // Agregar animaciones y mostrar información al pasar el ratón
           leafletPolygon.on('mouseover', function () {
             this.setStyle({
               weight: 5,
@@ -350,11 +338,10 @@
             });
           });
 
-          // Mostrar en el popup la información relevante: Sección Censal, Zona y Póliza
+          // Mostrar en el popup la información relevante: Sección Censal y Zona de Explotación
           leafletPolygon.bindPopup(`
             <b>Sección Censal:</b> ${sectionCensal}<br>
-            <b>Zona de Explotación:</b> ${zone}<br>
-            <b>Póliza:</b> ${poliza}
+            <b>Zona de Explotación:</b> ${zone}
           `);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
