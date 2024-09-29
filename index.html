@@ -319,7 +319,7 @@
           const leafletPolygon = L.polygon(coordinates, {
             color: getColorForZone(zone),
             fillColor: getColorForZone(zone),
-            fillOpacity: 0.5,
+            fillOpacity: 0.3, // Ajuste de opacidad para mayor visibilidad del mapa
             weight: 2
           }).addTo(polygonLayer);
 
@@ -328,7 +328,7 @@
             this.setStyle({
               weight: 5,
               color: '#666',
-              fillOpacity: 0.7,
+              fillOpacity: 0.5, // Al aumentar hover, dar más visibilidad al polígono
               fillColor: getColorForZone(zone)
             });
           });
@@ -337,7 +337,7 @@
             this.setStyle({
               weight: 2,
               color: getColorForZone(zone),
-              fillOpacity: 0.5
+              fillOpacity: 0.3  // Restaurar opacidad al salir del hover
             });
           });
 
@@ -363,11 +363,19 @@
       polygonLayer.clearLayers();  // Elimina todos los polígonos existentes antes de agregar nuevos
     }
 
-    // Generar colores fijos para cada zona
+    // Generar colores suaves para cada zona
     const zoneColors = {};
+    const colorsPalette = [
+      '#87CEFA', '#90EE90', '#FFFACD', '#FFC0CB', '#E6E6FA', '#98FF98',
+      '#FFDAB9', '#F5F5DC', '#DDA0DD', '#AFEEEE', '#B0E0E6', '#E0FFFF', 
+      '#F0E68C', '#FFE4E1', '#FAFAD2', '#D8BFD8', '#E0FFFF', '#F5DEB3', 
+      '#FFEBCD', '#FFDAB9', '#F0FFF0', '#FAEBD7', '#FFB6C1', '#FFF0F5', '#FFEFD5'
+    ];
+
     function getColorForZone(zone) {
       if (!zoneColors[zone]) {
-        zoneColors[zone] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+        const randomColor = colorsPalette[Math.floor(Math.random() * colorsPalette.length)];
+        zoneColors[zone] = randomColor;
       }
       return zoneColors[zone];
     }
