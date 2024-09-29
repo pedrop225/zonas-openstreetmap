@@ -308,10 +308,20 @@
 
       data.forEach(function(row) {
         try {
+          if (!row['Poligon'] || !row[zoneColumn] || !row[polColumn]) {
+            console.error('Faltan columnas esperadas en el archivo CSV.');
+            return;
+          }
+
           const polygonData = JSON.parse(row['Poligon']);
           const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
           const zone = row[zoneColumn];
           const poliza = row[polColumn];  // Póliza basada en el interruptor
+
+          if (!polygonData || !polygonData.coordinates) {
+            console.error('El formato del polígono es incorrecto.');
+            return;
+          }
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
@@ -322,13 +332,13 @@
             weight: 2
           }).addTo(polygonLayer);
 
-          // Agregar animaciones y mostrar información al pasar el ratón
+          // Animaciones de hover
           leafletPolygon.on('mouseover', function () {
             this.setStyle({
               weight: 5,
               color: '#666',
               fillOpacity: 0.7,
-              fillColor: getColorForZone(zone) // Asegurar que el color no cambie al pasar el ratón
+              fillColor: getColorForZone(zone)
             });
           });
 
