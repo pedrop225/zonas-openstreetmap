@@ -237,7 +237,7 @@
     /* Botón de acción de la leyenda ajustado a un tamaño más pequeño */
     .toggle-legend-btn {
       position: fixed;
-      bottom: 10px; /* Añadir un pequeño margen inferior */
+      bottom: 20px; /* Separación constante del borde inferior */
       left: 50%;
       transform: translateX(-50%);
       background-color: #3498db;
@@ -465,10 +465,8 @@
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
-        legendButton.style.bottom = '45px'; // Muy cerca del panel de leyenda sin solaparse
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
-        legendButton.style.bottom = '10px'; // Añadir un pequeño margen inferior cuando la leyenda está oculta
       }
     }
 
