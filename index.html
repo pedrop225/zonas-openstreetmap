@@ -29,7 +29,6 @@
       color: white;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       padding: 1rem;
       font-size: 1.8rem;
       font-weight: 600;
@@ -46,8 +45,7 @@
       align-items: center;
     }
 
-    #toggleSidebarBtn {
-      margin-right: 1rem;
+    #toggleSidebarBtn, #toggleRightSidebarBtn {
       font-size: 18px;
       background-color: #3498db;
       color: white;
@@ -56,28 +54,16 @@
       cursor: pointer;
       border-radius: 5px;
       transition: background-color 0.3s ease;
+      margin-right: 10px;
     }
 
-    #toggleSidebarBtn:hover {
+    #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
       background-color: #2980b9;
     }
 
     #toggleRightSidebarBtn {
-      font-size: 18px;
-      background-color: #3498db;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      padding-right: 15px; /* Añadido padding-right */
-      transition: background-color 0.3s ease;
-      position: relative; /* Asegurar que esté dentro del flujo del documento */
-      z-index: 1001; /* Para asegurarnos de que esté encima de otros elementos */
-    }
-
-    #toggleRightSidebarBtn:hover {
-      background-color: #2980b9;
+      padding-right: 15px;
+      z-index: 1001;
     }
 
     /* Efecto de desenfoque cuando la barra lateral derecha está abierta */
@@ -117,9 +103,9 @@
 
     .right-sidebar {
       right: 0;
-      width: 180px;
-      transform: translateX(180px); /* Inicialmente oculta */
-      z-index: 1100; /* Asegurar que esté encima del contenido */
+      width: 540px; /* Triplicamos la amplitud de la barra lateral derecha */
+      transform: translateX(540px); /* Inicialmente oculta */
+      z-index: 1100;
     }
 
     .sidebar.visible {
@@ -325,11 +311,11 @@
   <header>
     <div id="header-left">
       <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+      <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
+        <i class="fas fa-info-circle"></i>
+      </button>
       <span>Visualización de Polígonos por Zona de Explotación</span>
     </div>
-    <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
-      <i class="fas fa-info-circle"></i>
-    </button>
   </header>
 
   <!-- Barra lateral izquierda -->
@@ -603,7 +589,7 @@
 
       const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
       if (rightSidebar.classList.contains('visible')) {
-        leafletControls.style.right = '230px'; // Ajustar cuando la barra derecha esté visible
+        leafletControls.style.right = '590px'; // Ajustar cuando la barra derecha esté visible
       } else {
         leafletControls.style.right = '50px';  // Ajustar cuando la barra derecha esté oculta
       }
