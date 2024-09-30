@@ -265,6 +265,60 @@
       background-color: #2980b9;
     }
 
+    /* Popup de resumen */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 1500;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background-color: white;
+      padding: 20px;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .popup-content h3 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .popup-close-btn {
+      background-color: #e74c3c;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      float: right;
+      margin-top: -20px;
+      margin-right: -20px;
+    }
+
+    .popup-close-btn:hover {
+      background-color: #c0392b;
+    }
+
+    /* Estilo del contenido borroso */
+    .blurred {
+      filter: blur(5px);
+      pointer-events: none;
+    }
+
   </style>
 </head>
 <body>
@@ -301,10 +355,22 @@
       <span class="switch-label">V. Final</span>
     </div>
 
+    <!-- Botón para mostrar el resumen -->
+    <button class="file-upload-button" onclick="showSummary()">Mostrar Resumen</button>
+
   </div>
 
   <div id="mapContainer" class="map-container">
     <div id="map" class="map"></div>
+  </div>
+
+  <!-- Popup de resumen -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-content">
+      <button class="popup-close-btn" onclick="closeSummary()">X</button>
+      <h3>Resumen de Zonas</h3>
+      <div id="summaryContent"></div>
+    </div>
   </div>
 
   <!-- Botón para mostrar la leyenda -->
@@ -330,6 +396,9 @@
     const legendPanel = document.getElementById('legendPanel');
     const legendContent = document.getElementById('legendContent');
     const toggleLegendBtn = document.getElementById('toggleLegendBtn');
+    const popupOverlay = document.getElementById('popupOverlay');
+    const summaryContent = document.getElementById('summaryContent');
+    const mapContainer = document.getElementById('mapContainer');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
@@ -522,6 +591,41 @@
       } else {
         leafletControls.style.left = '50px';  // Ajustar cuando la barra esté oculta
       }
+    }
+
+    function showSummary() {
+      // Generar el resumen a partir de csvData
+      let summaryHtml = '';
+      const zones = {};
+
+      csvData.forEach(row => {
+        const zone = vInicialSwitch.checked ? row['ZE. Zona de Explotación'] : row['Nueva Zona'];
+        const sectionCensal = row['ZE. Sección Censal'];
+        const polizas = vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] : row['Pol. Nueva Zona'];
+
+        if (!zones[zone]) {
+          zones[zone] = { sections: [], polizas: polizas };
+        }
+
+        zones[zone].sections.push(sectionCensal);
+      });
+
+      for (const zone in zones) {
+        summaryHtml += `<h4>Zona: ${zone}</h4>`;
+        summaryHtml += `<p>Secciones Censales: ${zones[zone].sections.join(', ')}</p>`;
+        summaryHtml += `<p>Pólizas: ${zones[zone].polizas}</p>`;
+      }
+
+      summaryContent.innerHTML = summaryHtml;
+      mapContainer.classList.add('blurred');  // Añadir el blur al mapa
+      sidebar.classList.add('blurred');  // Añadir el blur a la barra lateral
+      popupOverlay.style.display = 'flex';  // Mostrar el popup
+    }
+
+    function closeSummary() {
+      mapContainer.classList.remove('blurred');  // Quitar el blur al mapa
+      sidebar.classList.remove('blurred');  // Quitar el blur a la barra lateral
+      popupOverlay.style.display = 'none';  // Ocultar el popup
     }
 
     // Configuración inicial: solo "V. Inicial" activado
