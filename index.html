@@ -64,6 +64,16 @@
     #toggleRightSidebarBtn {
       padding-right: 15px;
       z-index: 1001;
+      position: relative;
+    }
+
+    #toggleRightSidebarBtn i {
+      margin-right: 5px; /* Ajusta la separación entre el icono y el texto */
+    }
+
+    /* Evitar el blur en el botón de la barra derecha */
+    #toggleRightSidebarBtn {
+      filter: none !important;
     }
 
     /* Efecto de desenfoque cuando la barra lateral derecha está abierta */
@@ -312,7 +322,7 @@
     <div id="header-left">
       <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
       <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
-        <i class="fas fa-info-circle"></i>
+        <i class="fas fa-info"></i> Información
       </button>
       <span>Visualización de Polígonos por Zona de Explotación</span>
     </div>
