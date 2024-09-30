@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <title>Mapa de Polígonos por Zona de Explotación</title>
+  <title>Mapa de Zonas de Explotación</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
@@ -11,8 +11,12 @@
   <!-- Google Fonts -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" />
 
+  <!-- FontAwesome para los íconos -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
   <!-- Estilos propios -->
   <style>
+    /* Mantener el mismo estilo de la página aquí */
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f4f4f9;
@@ -56,6 +60,18 @@
 
     #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
       background-color: #2980b9;
+    }
+
+    #toggleRightSidebarBtn {
+      padding-right: 15px;
+      z-index: 1001;
+      position: relative;
+    }
+
+    /* Efecto de desenfoque cuando la barra lateral derecha está abierta */
+    .blur {
+      filter: blur(5px);
+      transition: filter 0.3s ease;
     }
 
     .map-container {
@@ -102,31 +118,34 @@
       transform: translateX(0);
     }
 
-    .right-sidebar h2 {
-      font-size: 1.5rem;
+    .sidebar h2, .right-sidebar h2 {
+      font-size: 1.1rem;
       margin-bottom: 15px;
+      text-align: left;
     }
 
-    .summary-container {
+    .summary-content {
       margin-top: 20px;
-      font-size: 1rem;
-      color: white;
+      background-color: #fff;
+      padding: 15px;
+      color: #333;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .summary-container .zone-summary {
-      margin-bottom: 20px;
+    .summary-item {
+      margin-bottom: 15px;
+      font-size: 14px;
     }
 
-    .summary-container .zone-summary h3 {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
+    .summary-item h3 {
+      margin: 0 0 5px;
+      font-weight: 600;
     }
 
-    .summary-container .zone-summary ul {
-      padding-left: 20px;
-      list-style-type: circle;
+    .summary-item p {
+      margin: 0;
     }
-
   </style>
 </head>
 <body>
@@ -172,13 +191,23 @@
   <!-- Barra lateral derecha -->
   <div class="right-sidebar" id="rightSidebar">
     <h2>Resumen de Zonas</h2>
-    <div class="summary-container" id="summaryContainer">
-      <!-- Aquí se agregará el resumen dinámicamente -->
+    <div id="summaryContent" class="summary-content">
+      <!-- Resumen dinámico se cargará aquí -->
     </div>
   </div>
 
   <div id="mapContainer" class="map-container">
     <div id="map" class="map"></div>
+  </div>
+
+  <!-- Botón para mostrar la leyenda -->
+  <button class="toggle-legend-btn" id="toggleLegendBtn" onclick="toggleLegend()">Mostrar Leyenda</button>
+
+  <!-- Panel de leyenda oculto inicialmente -->
+  <div id="legendPanel" class="legend-panel">
+    <div id="legendContent">
+      <!-- Aquí se mostrarán los elementos de la leyenda -->
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -187,11 +216,14 @@
   <script>
     const vInicialSwitch = document.getElementById('vInicialSwitch');
     const vFinalSwitch = document.getElementById('vFinalSwitch');
-    const summaryContainer = document.getElementById('summaryContainer');
     const sidebar = document.getElementById('sidebar');
     const rightSidebar = document.getElementById('rightSidebar');
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
+    const legendPanel = document.getElementById('legendPanel');
+    const legendContent = document.getElementById('legendContent');
+    const toggleLegendBtn = document.getElementById('toggleLegendBtn');
+    const summaryContent = document.getElementById('summaryContent');
     const mapContainer = document.getElementById('mapContainer');
     const header = document.querySelector("header");
     let csvData = null; // Variable para almacenar los datos CSV en memoria
@@ -222,7 +254,7 @@
       if (csvData) {
         clearMap();  // Limpiar los polígonos antes de dibujar nuevamente
         processCSVData(csvData);  // Redibujar polígonos
-        updateSummary();  // Actualizar el resumen
+        generateSummary(csvData);  // Actualizar el resumen
       }
     }
 
@@ -244,7 +276,7 @@
           csvData = results.data;
           clearMap(); // Limpiar los polígonos antes de dibujar
           processCSVData(csvData); // Procesar los datos para dibujar el mapa
-          updateSummary(); // Actualizar el resumen
+          generateSummary(csvData);  // Generar resumen al cargar el archivo
         }
       });
     }
@@ -253,8 +285,19 @@
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
       const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
+      // Lista de colores predeterminados sin repetición
+      const colorsPalette = [
+        '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
+        '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
+        '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
+        '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
+      ];
+
       let usedColors = {}; // Almacenará los colores ya utilizados
       let colorIndex = 0;  // Índice para recorrer la paleta de colores
+      legendContent.innerHTML = ''; // Limpiar leyenda
+
+      let zonesWithColors = []; // Array para almacenar zonas y colores, para ordenarlos
       polygonsByZone = {}; // Reiniciar para almacenar los polígonos por zona
 
       data.forEach(function(row) {
@@ -263,13 +306,15 @@
           const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
           const zone = row[zoneColumn];
           const poliza = row[polizaColumn];  // Seleccionar póliza según interruptor
+          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];  // Siempre se muestra esta columna
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
 
           // Asignar color único a la zona
           if (!usedColors[zone]) {
-            usedColors[zone] = `hsl(${colorIndex * 137.5}, 60%, 70%)`; // Generar colores basados en la hue-shift
-            colorIndex++;
+            usedColors[zone] = colorsPalette[colorIndex];
+            colorIndex = (colorIndex + 1) % colorsPalette.length;
+            zonesWithColors.push({ zone, color: usedColors[zone] }); // Almacenar zona y color
           }
 
           const leafletPolygon = L.polygon(coordinates, {
@@ -281,19 +326,66 @@
 
           // Guardar los polígonos por zona
           if (!polygonsByZone[zone]) {
-            polygonsByZone[zone] = {
-              polygons: [],
-              censalSections: new Set(),
-              totalPolizas: 0
-            };
+            polygonsByZone[zone] = [];
           }
-          polygonsByZone[zone].polygons.push(leafletPolygon);
-          polygonsByZone[zone].censalSections.add(sectionCensal);
-          polygonsByZone[zone].totalPolizas += parseInt(poliza, 10) || 0;
+          polygonsByZone[zone].push(leafletPolygon);
 
+          // Agregar animaciones y mostrar información al pasar el ratón
+          leafletPolygon.on('mouseover', function () {
+            this.setStyle({
+              weight: 5,
+              color: '#666',
+              fillOpacity: 0.6, // Al aumentar hover, dar más visibilidad al polígono
+              fillColor: usedColors[zone]
+            });
+          });
+
+          leafletPolygon.on('mouseout', function () {
+            this.setStyle({
+              weight: 2,
+              color: usedColors[zone],
+              fillOpacity: 0.4  // Restaurar opacidad al salir del hover
+            });
+          });
+
+          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación, Pólizas ZE. Sección Censal, y Pólizas
+          leafletPolygon.bindPopup(`
+            <b>Sección Censal:</b> ${sectionCensal}<br>
+            <b>Zona de Explotación:</b> ${zone}<br>
+            <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
+            <b>Pólizas:</b> ${poliza}
+          `);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
         }
+      });
+
+      // Ordenar las zonas alfabéticamente y añadirlas a la leyenda
+      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone)).forEach(item => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${item.color}"></span>${item.zone}`;
+        legendItem.setAttribute('data-zone', item.zone); // Añadir el atributo de zona
+
+        // Añadir evento de clic para centrar la zona correspondiente en el mapa
+        legendItem.addEventListener('click', function() {
+          // Quitar la clase "selected" de otros elementos
+          document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('selected'));
+
+          // Añadir la clase "selected" al elemento clicado
+          this.classList.add('selected');
+
+          // Obtener la zona y centrarla
+          const zone = this.getAttribute('data-zone');
+          const zonePolygons = polygonsByZone[zone];
+          
+          if (zonePolygons && zonePolygons.length > 0) {
+            const group = L.featureGroup(zonePolygons); // Crear un grupo de polígonos
+            map.fitBounds(group.getBounds()); // Centrar y ajustar el mapa a los límites de los polígonos
+          }
+        });
+
+        legendContent.appendChild(legendItem);
       });
 
       if (polygonLayer.getLayers().length > 0) {
@@ -301,50 +393,98 @@
       }
     }
 
-    // Función para actualizar el resumen
-    function updateSummary() {
-      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-      const titleColumn = vInicialSwitch.checked ? 'Zonas de Explotación' : 'Zonas Nuevas';
-      summaryContainer.innerHTML = '';
-
-      Object.keys(polygonsByZone).forEach(zone => {
-        const zoneSummary = document.createElement('div');
-        zoneSummary.classList.add('zone-summary');
-        
-        // Título de la zona
-        const zoneTitle = document.createElement('h3');
-        zoneTitle.textContent = `${zoneColumn}: ${zone}`;
-        zoneSummary.appendChild(zoneTitle);
-        
-        // Información detallada de la zona
-        const detailsList = document.createElement('ul');
-        
-        const censalCount = document.createElement('li');
-        censalCount.textContent = `Secciones Censales: ${polygonsByZone[zone].censalSections.size}`;
-        detailsList.appendChild(censalCount);
-        
-        const totalPolizas = document.createElement('li');
-        totalPolizas.textContent = `Total de Pólizas: ${polygonsByZone[zone].totalPolizas}`;
-        detailsList.appendChild(totalPolizas);
-        
-        zoneSummary.appendChild(detailsList);
-        summaryContainer.appendChild(zoneSummary);
-      });
-    }
-
     // Limpiar los polígonos del mapa
     function clearMap() {
       polygonLayer.clearLayers();  // Elimina todos los polígonos existentes antes de agregar nuevos
     }
 
+    // Generar el resumen dinámico en la barra derecha
+    function generateSummary(data) {
+      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+      const summary = {};
+
+      data.forEach(function(row) {
+        const zone = row[zoneColumn];
+        const sectionCensal = row['ZE. Sección Censal'];
+        const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
+        const polizaZona = vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] : row['Pol. Nueva Zona'];
+
+        if (!summary[zone]) {
+          summary[zone] = {
+            seccionesCensales: [],
+            totalPolizas: 0,
+            totalPolizasSeccionales: 0
+          };
+        }
+
+        summary[zone].seccionesCensales.push(sectionCensal);
+        summary[zone].totalPolizas += parseInt(polizaZona || 0);
+        summary[zone].totalPolizasSeccionales += parseInt(polizaSeccionCensal || 0);
+      });
+
+      // Limpiar contenido anterior
+      summaryContent.innerHTML = '';
+
+      // Crear elementos de resumen
+      for (const zone in summary) {
+        const summaryItem = document.createElement('div');
+        summaryItem.className = 'summary-item';
+
+        summaryItem.innerHTML = `
+          <h3>${zone}</h3>
+          <p><b>Secciones Censales:</b> ${summary[zone].seccionesCensales.join(', ')}</p>
+          <p><b>Total Pólizas (Zona):</b> ${summary[zone].totalPolizas}</p>
+          <p><b>Total Pólizas (Secciones Censales):</b> ${summary[zone].totalPolizasSeccionales}</p>
+        `;
+
+        summaryContent.appendChild(summaryItem);
+      }
+    }
+
+    // Mostrar/Ocultar la leyenda
+    function toggleLegend() {
+      legendPanel.classList.toggle('visible');
+      const legendButton = document.querySelector('.toggle-legend-btn');
+      if (legendPanel.classList.contains('visible')) {
+        legendButton.innerText = 'Ocultar Leyenda';
+        legendButton.style.bottom = (legendPanel.offsetHeight + 20) + 'px'; // Mantener 20px de separación
+      } else {
+        legendButton.innerText = 'Mostrar Leyenda';
+        legendButton.style.bottom = '20px'; // Mantener a 20px del borde inferior
+      }
+    }
+
     function toggleSidebar() {
       sidebar.classList.toggle('visible');
+
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
+      if (sidebar.classList.contains('visible')) {
+        leafletControls.style.left = '230px'; // Ajustar cuando la barra esté visible
+      } else {
+        leafletControls.style.left = '50px';  // Ajustar cuando la barra esté oculta
+      }
     }
 
     function toggleRightSidebar() {
       rightSidebar.classList.toggle('visible');
+
+      // Aplicar desenfoque si la barra derecha está visible
+      const isRightSidebarVisible = rightSidebar.classList.contains('visible');
+      mapContainer.classList.toggle('blur', isRightSidebarVisible);
+      header.classList.toggle('blur', isRightSidebarVisible);
+      sidebar.classList.toggle('blur', isRightSidebarVisible);
+      legendPanel.classList.toggle('blur', isRightSidebarVisible);
+
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
+      if (rightSidebar.classList.contains('visible')) {
+        leafletControls.style.right = '590px'; // Ajustar cuando la barra derecha esté visible
+      } else {
+        leafletControls.style.right = '50px';  // Ajustar cuando la barra derecha esté oculta
+      }
     }
 
+    // Configuración inicial: solo "V. Inicial" activado
+    document.addEventListener('DOMContentLoaded', () => vFinalSwitch.checked = false);
   </script>
 
 </body>
