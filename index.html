@@ -237,7 +237,7 @@
     /* Botón de acción de la leyenda ajustado a un tamaño más pequeño */
     .toggle-legend-btn {
       position: fixed;
-      bottom: 20px; /* Ajustado para estar más cerca del panel de leyenda */
+      bottom: 45px; /* Muy cerca del panel de leyenda sin solaparse */
       left: 50%;
       transform: translateX(-50%);
       background-color: #3498db;
@@ -466,7 +466,7 @@
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
-        legendButton.style.bottom = '60px'; // Ajustado para estar cerca del panel de leyenda sin solaparse
+        legendButton.style.bottom = '45px'; // Muy cerca del panel de leyenda sin solaparse
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
         legendButton.style.bottom = '20px'; // Restaurar posición del botón cuando la leyenda esté oculta
