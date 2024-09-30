@@ -288,18 +288,52 @@
       cursor: pointer;
       font-size: 12px;
       z-index: 1100;
-      transition: bottom 0.3s ease, transform 0.3s ease;
+      transition: transform 0.3s ease;
     }
 
     .toggle-legend-btn:hover {
       background-color: #2980b9;
     }
 
-    .legend-panel.visible + .toggle-legend-btn {
-      bottom: 100px; /* Mantener el botón por encima de la leyenda cuando esté visible */
-      transform: translateX(-50%);
+    /* Panel de leyenda */
+    .legend-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100px; /* Ajustar la altura de la leyenda */
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      display: none; /* Inicialmente oculta */
+      z-index: 1000;
+      overflow-y: auto; /* Permitir scroll si es necesario */
     }
 
+    .legend-panel.visible {
+      display: block;
+    }
+
+    .legend-content {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .legend-item {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 5px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .legend-color-box {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -359,7 +393,7 @@
 
   <!-- Panel de leyenda oculto inicialmente -->
   <div id="legendPanel" class="legend-panel">
-    <div id="legendContent">
+    <div id="legendContent" class="legend-content">
       <!-- Aquí se mostrarán los elementos de la leyenda -->
     </div>
   </div>
@@ -601,10 +635,8 @@
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
-        legendButton.style.bottom = (legendPanel.offsetHeight + 20) + 'px'; // Mantener 20px de separación
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
-        legendButton.style.bottom = '20px'; // Mantener a 20px del borde inferior
       }
     }
 
