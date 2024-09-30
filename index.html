@@ -66,7 +66,7 @@
 
     .sidebar {
       height: 100vh;
-      width: 220px; /* Aumentamos el tamaño de la barra lateral */
+      width: 220px;
       position: fixed;
       top: 80px;
       left: 0;
@@ -74,7 +74,7 @@
       color: white;
       padding: 15px;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      transform: translateX(-220px); /* Ajustamos el tamaño al aumentar el ancho */
+      transform: translateX(-220px);
       transition: transform 0.3s ease;
       z-index: 999;
     }
@@ -196,7 +196,7 @@
 
     /* Ajuste de posición para los controles del mapa para evitar solapamiento con la barra lateral */
     .leaflet-top.leaflet-left {
-      left: 70px; /* Aumentamos el margen de los controles del mapa */
+      left: 70px; /* Mantener la misma distancia en todo momento */
       transition: left 0.3s ease;
     }
 
@@ -448,6 +448,17 @@
     const sidebar = document.getElementById('sidebar');
     const fileInput = document.getElementById('fileInput');
     let csvData = [];
+    let polygonsByZone = {}; // Guardar los polígonos por zona
+
+    // Inicializar el mapa
+    let map = L.map('map').setView([28.0665, -16.7332], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
+      maxZoom: 18,
+    }).addTo(map);
+
+    let polygonLayer = L.featureGroup().addTo(map);
 
     fileInput.addEventListener('change', handleFileSelection);
 
@@ -460,12 +471,62 @@
             csvData = results.data;
             fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
             alert("Archivo CSV cargado correctamente.");
+            drawPolygons(); // Dibujar los polígonos después de cargar los datos
           },
           error: function(error) {
             console.error("Error al procesar el CSV:", error);
             alert("Error al cargar el archivo CSV.");
           }
         });
+      }
+    }
+
+    function drawPolygons() {
+      polygonLayer.clearLayers(); // Limpiar los polígonos previos
+
+      if (!csvData.length) {
+        return;
+      }
+
+      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+      const colorsPalette = [
+        '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
+        '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
+        '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
+        '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
+      ];
+
+      let usedColors = {};
+      let colorIndex = 0;
+
+      polygonsByZone = {};
+
+      csvData.forEach(row => {
+        const polygonData = JSON.parse(row['Poligon']);
+        const zone = row[zoneColumn];
+        const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir lat/long
+
+        // Asignar un color único por zona
+        if (!usedColors[zone]) {
+          usedColors[zone] = colorsPalette[colorIndex];
+          colorIndex = (colorIndex + 1) % colorsPalette.length;
+        }
+
+        const leafletPolygon = L.polygon(coordinates, {
+          color: usedColors[zone],
+          fillColor: usedColors[zone],
+          fillOpacity: 0.5,
+          weight: 2
+        }).addTo(polygonLayer);
+
+        if (!polygonsByZone[zone]) {
+          polygonsByZone[zone] = [];
+        }
+        polygonsByZone[zone].push(leafletPolygon);
+      });
+
+      if (polygonLayer.getLayers().length > 0) {
+        map.fitBounds(polygonLayer.getBounds());
       }
     }
 
@@ -477,7 +538,6 @@
 
       const zones = {};
 
-      // Agrupar los datos por Zona de Explotación
       csvData.forEach(row => {
         const zone = row['ZE. Zona de Explotación'];
         const sectionCensal = row['ZE. Sección Censal'];
@@ -493,7 +553,6 @@
 
       let summaryHtml = '';
 
-      // Generar las filas del resumen
       for (const zone in zones) {
         summaryHtml += `
           <tr class="summary-row" onclick="toggleZoneDetails('${zone}')">
@@ -502,7 +561,6 @@
           </tr>
         `;
 
-        // Agregar las secciones censales como filas ocultas inicialmente
         zones[zone].sections.forEach(section => {
           summaryHtml += `
             <tr class="expandable-row hidden" data-zone="${zone}">
@@ -527,7 +585,6 @@
         row.classList.toggle('hidden');
       });
 
-      // Cambiar el ícono de expandir/colapsar
       if (icon.classList.contains('collapsed')) {
         icon.classList.remove('collapsed');
         icon.classList.add('expanded');
@@ -538,19 +595,13 @@
     }
 
     function closeSummary() {
-      popupOverlay.style.display = 'none';  // Ocultar el popup
-      mapContainer.classList.remove('blurred');  // Quitar el blur al mapa
-      sidebar.classList.remove('blurred');  // Quitar el blur a la barra lateral
+      popupOverlay.style.display = 'none';
+      mapContainer.classList.remove('blurred');
+      sidebar.classList.remove('blurred');
     }
 
     function toggleSidebar() {
       sidebar.classList.toggle('visible');
-      const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
-      if (sidebar.classList.contains('visible')) {
-        leafletControls.style.left = '240px'; // Ajustar cuando la barra esté visible
-      } else {
-        leafletControls.style.left = '70px';  // Ajustar cuando la barra esté oculta
-      }
     }
 
     function toggleLegend() {
@@ -563,14 +614,6 @@
         legendButton.innerText = 'Mostrar Leyenda';
       }
     }
-
-    // Inicializar el mapa
-    let map = L.map('map').setView([28.0665, -16.7332], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
-      maxZoom: 18,
-    }).addTo(map);
   </script>
 
 </body>
