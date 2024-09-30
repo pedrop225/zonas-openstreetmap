@@ -66,7 +66,7 @@
 
     .sidebar {
       height: 100vh;
-      width: 180px;
+      width: 220px; /* Aumentamos el tamaño de la barra lateral */
       position: fixed;
       top: 80px;
       left: 0;
@@ -74,7 +74,7 @@
       color: white;
       padding: 15px;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      transform: translateX(-180px);
+      transform: translateX(-220px); /* Ajustamos el tamaño al aumentar el ancho */
       transition: transform 0.3s ease;
       z-index: 999;
     }
@@ -196,7 +196,7 @@
 
     /* Ajuste de posición para los controles del mapa para evitar solapamiento con la barra lateral */
     .leaflet-top.leaflet-left {
-      left: 50px; /* Ajustar para evitar la superposición con la barra lateral */
+      left: 70px; /* Aumentamos el margen de los controles del mapa */
       transition: left 0.3s ease;
     }
 
@@ -446,17 +446,35 @@
     const summaryTable = document.getElementById('summaryTable');
     const mapContainer = document.getElementById('mapContainer');
     const sidebar = document.getElementById('sidebar');
+    const fileInput = document.getElementById('fileInput');
+    let csvData = [];
 
-    let csvData = [
-      // Simulación de datos
-      { "ZE. Zona de Explotación": "103940004", "ZE. Sección Censal": "3800101001", "Pol. ZE. Zona de Explotación": "70" },
-      { "ZE. Zona de Explotación": "103940004", "ZE. Sección Censal": "3800101002", "Pol. ZE. Zona de Explotación": "50" },
-      { "ZE. Zona de Explotación": "103940006", "ZE. Sección Censal": "3800101006", "Pol. ZE. Zona de Explotación": "25" },
-      { "ZE. Zona de Explotación": "103940006", "ZE. Sección Censal": "3800101009", "Pol. ZE. Zona de Explotación": "61" },
-      { "ZE. Zona de Explotación": "103940007", "ZE. Sección Censal": "3800201001", "Pol. ZE. Zona de Explotación": "206" }
-    ];
+    fileInput.addEventListener('change', handleFileSelection);
+
+    function handleFileSelection() {
+      const file = fileInput.files[0];
+      if (file) {
+        Papa.parse(file, {
+          header: true,
+          complete: function(results) {
+            csvData = results.data;
+            fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
+            alert("Archivo CSV cargado correctamente.");
+          },
+          error: function(error) {
+            console.error("Error al procesar el CSV:", error);
+            alert("Error al cargar el archivo CSV.");
+          }
+        });
+      }
+    }
 
     function showSummary() {
+      if (!csvData.length) {
+        alert("Por favor, carga un archivo CSV antes de mostrar el resumen.");
+        return;
+      }
+
       const zones = {};
 
       // Agrupar los datos por Zona de Explotación
@@ -527,6 +545,12 @@
 
     function toggleSidebar() {
       sidebar.classList.toggle('visible');
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
+      if (sidebar.classList.contains('visible')) {
+        leafletControls.style.left = '240px'; // Ajustar cuando la barra esté visible
+      } else {
+        leafletControls.style.left = '70px';  // Ajustar cuando la barra esté oculta
+      }
     }
 
     function toggleLegend() {
