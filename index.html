@@ -253,40 +253,69 @@
 
     .summary-content {
       margin-top: 20px;
-      background-color: #fff;
-      padding: 15px;
-      color: #333;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      /* Ajustar estilos según tus preferencias */
     }
 
-    .summary-item {
-      margin-bottom: 15px;
-      font-size: 14px;
+    /* Estilos para el resumen jerárquico */
+    .summary-zone {
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
     }
 
-    .summary-item h3 {
-      margin: 0 0 5px;
-      font-weight: 600;
+    .summary-header {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
     }
 
-    .summary-item p {
-      margin: 0;
+    .toggle-button {
+      width: 20px;
+      text-align: center;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .zone-name {
+      flex-grow: 1;
+      font-weight: bold;
+    }
+
+    .zone-total {
+      font-weight: normal;
+    }
+
+    .sections-container {
+      margin-left: 30px;
+      padding-top: 10px;
+    }
+
+    .summary-section {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .section-name {
+      flex-grow: 1;
+    }
+
+    .section-total {
+      font-weight: normal;
     }
 
     /* Botón de acción de la leyenda */
     .toggle-legend-btn {
       position: fixed;
-      bottom: 20px; /* Establecer una distancia fija del fondo */
+      bottom: 20px;
       left: 50%;
       background-color: #3498db;
       color: white;
-      padding: 6px 12px; /* Reducir el padding */
+      padding: 6px 12px;
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      font-size: 12px; /* Reducir el tamaño de fuente */
-      z-index: 1200; /* Asegura que esté por encima de otros elementos */
+      font-size: 12px;
+      z-index: 1200;
       transform: translateX(-50%);
       transition: background-color 0.3s ease, bottom 0.3s ease;
     }
@@ -301,11 +330,11 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background-color: #f0f0f0; /* Cambiado a un gris claro */
+      background-color: #f0f0f0;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-      display: none; /* Inicialmente oculta */
+      display: none;
       z-index: 1000;
-      overflow-y: auto; /* Permitir scroll si es necesario */
+      overflow-y: auto;
       padding: 10px;
       text-align: center;
     }
@@ -320,11 +349,11 @@
       padding: 5px;
       font-size: 12px;
       text-align: center;
-      cursor: pointer; /* Añadir cursor de puntero para indicar que es clicable */
+      cursor: pointer;
     }
 
     .legend-item.selected {
-      border-bottom: 2px solid #3498db; /* Indicar visualmente la selección */
+      border-bottom: 2px solid #3498db;
     }
 
     .legend-color-box {
@@ -595,38 +624,70 @@
       data.forEach(function(row) {
         const zone = row[zoneColumn];
         const sectionCensal = row['ZE. Sección Censal'];
-        const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
-        const polizaZona = vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] : row['Pol. Nueva Zona'];
+        const polizaSeccionCensal = parseInt(row['Pol. ZE. Sección Censal'] || 0);
+        const polizaZona = parseInt(vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] : row['Pol. Nueva Zona'] || 0);
 
         if (!summary[zone]) {
           summary[zone] = {
-            seccionesCensales: [],
-            totalPolizas: 0,
-            totalPolizasSeccionales: 0
+            totalPolizasZona: 0,
+            secciones: {}
           };
         }
 
-        summary[zone].seccionesCensales.push(sectionCensal);
-        summary[zone].totalPolizas += parseInt(polizaZona || 0);
-        summary[zone].totalPolizasSeccionales += parseInt(polizaSeccionCensal || 0);
+        if (!summary[zone].secciones[sectionCensal]) {
+          summary[zone].secciones[sectionCensal] = {
+            totalPolizasSeccion: 0
+          };
+        }
+
+        summary[zone].totalPolizasZona += polizaZona;
+        summary[zone].secciones[sectionCensal].totalPolizasSeccion += polizaSeccionCensal;
       });
 
       // Limpiar contenido anterior
       summaryContent.innerHTML = '';
 
-      // Crear elementos de resumen
+      // Crear estructura jerárquica
       for (const zone in summary) {
-        const summaryItem = document.createElement('div');
-        summaryItem.className = 'summary-item';
+        // Crear elemento para la zona
+        const zoneItem = document.createElement('div');
+        zoneItem.className = 'summary-zone';
 
-        summaryItem.innerHTML = `
-          <h3>${zone}</h3>
-          <p><b>Secciones Censales:</b> ${summary[zone].seccionesCensales.join(', ')}</p>
-          <p><b>Total Pólizas (Zona):</b> ${summary[zone].totalPolizas}</p>
-          <p><b>Total Pólizas (Secciones Censales):</b> ${summary[zone].totalPolizasSeccionales}</p>
+        // Encabezado de la zona con botón de expandir/contraer
+        const zoneHeader = document.createElement('div');
+        zoneHeader.className = 'summary-header';
+        zoneHeader.innerHTML = `
+          <span class="toggle-button">+</span>
+          <span class="zone-name">${zone}</span>
+          <span class="zone-total">Total Pólizas: ${summary[zone].totalPolizasZona}</span>
         `;
+        zoneItem.appendChild(zoneHeader);
 
-        summaryContent.appendChild(summaryItem);
+        // Contenedor para las secciones censales, inicialmente oculto
+        const sectionsContainer = document.createElement('div');
+        sectionsContainer.className = 'sections-container';
+        sectionsContainer.style.display = 'none';
+
+        for (const section in summary[zone].secciones) {
+          // Crear elemento para la sección censal
+          const sectionItem = document.createElement('div');
+          sectionItem.className = 'summary-section';
+          sectionItem.innerHTML = `
+            <span class="section-name">${section}</span>
+            <span class="section-total">Total Pólizas: ${summary[zone].secciones[section].totalPolizasSeccion}</span>
+          `;
+          sectionsContainer.appendChild(sectionItem);
+        }
+
+        zoneItem.appendChild(sectionsContainer);
+        summaryContent.appendChild(zoneItem);
+
+        // Añadir evento de clic para expandir/contraer
+        zoneHeader.querySelector('.toggle-button').addEventListener('click', function() {
+          const isVisible = sectionsContainer.style.display === 'block';
+          sectionsContainer.style.display = isVisible ? 'none' : 'block';
+          this.textContent = isVisible ? '+' : '-';
+        });
       }
     }
 
