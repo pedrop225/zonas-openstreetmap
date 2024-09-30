@@ -72,10 +72,18 @@
       border-radius: 5px;
       padding-right: 15px; /* Añadido padding-right */
       transition: background-color 0.3s ease;
+      position: relative; /* Asegurar que esté dentro del flujo del documento */
+      z-index: 1001; /* Para asegurarnos de que esté encima de otros elementos */
     }
 
     #toggleRightSidebarBtn:hover {
       background-color: #2980b9;
+    }
+
+    /* Efecto de desenfoque cuando la barra lateral derecha está abierta */
+    .blur {
+      filter: blur(5px);
+      transition: filter 0.3s ease;
     }
 
     .map-container {
@@ -111,6 +119,7 @@
       right: 0;
       width: 180px;
       transform: translateX(180px); /* Inicialmente oculta */
+      z-index: 1100; /* Asegurar que esté encima del contenido */
     }
 
     .sidebar.visible {
@@ -266,6 +275,7 @@
     .legend-item {
       display: inline-block;
       margin-right: 20px;
+      margin-bottom: 10px; /* Distancia vertical entre elementos */
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
@@ -385,6 +395,8 @@
     const legendPanel = document.getElementById('legendPanel');
     const legendContent = document.getElementById('legendContent');
     const toggleLegendBtn = document.getElementById('toggleLegendBtn');
+    const mapContainer = document.getElementById('mapContainer');
+    const header = document.querySelector("header");
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
@@ -581,6 +593,13 @@
 
     function toggleRightSidebar() {
       rightSidebar.classList.toggle('visible');
+
+      // Aplicar desenfoque si la barra derecha está visible
+      const isRightSidebarVisible = rightSidebar.classList.contains('visible');
+      mapContainer.classList.toggle('blur', isRightSidebarVisible);
+      header.classList.toggle('blur', isRightSidebarVisible);
+      sidebar.classList.toggle('blur', isRightSidebarVisible);
+      legendPanel.classList.toggle('blur', isRightSidebarVisible);
 
       const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
       if (rightSidebar.classList.contains('visible')) {
