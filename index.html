@@ -237,7 +237,7 @@
     /* Botón de acción de la leyenda ajustado a un tamaño más pequeño */
     .toggle-legend-btn {
       position: fixed;
-      bottom: 0; /* Pegado al borde inferior inicialmente */
+      bottom: 10px; /* Añadir un pequeño margen inferior */
       left: 50%;
       transform: translateX(-50%);
       background-color: #3498db;
@@ -247,7 +247,6 @@
       border-radius: 15px;
       cursor: pointer;
       font-size: 12px; /* Fuente más pequeña */
-      margin-bottom: 0;
       z-index: 1100;
     }
 
@@ -469,7 +468,7 @@
         legendButton.style.bottom = '45px'; // Muy cerca del panel de leyenda sin solaparse
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
-        legendButton.style.bottom = '0'; // Pegado al borde inferior cuando la leyenda está oculta
+        legendButton.style.bottom = '10px'; // Añadir un pequeño margen inferior cuando la leyenda está oculta
       }
     }
 
