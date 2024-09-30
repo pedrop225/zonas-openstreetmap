@@ -199,6 +199,61 @@
       left: 50px; /* Ajustar para evitar la superposición con la barra lateral */
       transition: left 0.3s ease;
     }
+
+    /* Panel de leyenda inferior */
+    .legend-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      text-align: center;
+      transition: transform 0.3s ease;
+      transform: translateY(100%); /* Oculto inicialmente */
+      z-index: 1000;
+    }
+
+    .legend-panel.visible {
+      transform: translateY(0);
+    }
+
+    .legend-item {
+      display: inline-block;
+      margin-right: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .legend-color-box {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .toggle-legend-btn {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #3498db;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 10px;
+      z-index: 1100;
+    }
+
+    .toggle-legend-btn:hover {
+      background-color: #2980b9;
+    }
+
   </style>
 </head>
 <body>
@@ -241,6 +296,16 @@
     <div id="map" class="map"></div>
   </div>
 
+  <!-- Botón para mostrar la leyenda -->
+  <button class="toggle-legend-btn" onclick="toggleLegend()">Mostrar Leyenda</button>
+
+  <!-- Panel de leyenda oculto inicialmente -->
+  <div id="legendPanel" class="legend-panel">
+    <div id="legendContent">
+      <!-- Aquí se mostrarán los elementos de la leyenda -->
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -251,6 +316,8 @@
     const sidebar = document.getElementById('sidebar');
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
+    const legendPanel = document.getElementById('legendPanel');
+    const legendContent = document.getElementById('legendContent');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     // Manejar cambios de interruptores
@@ -316,6 +383,7 @@
 
       let usedColors = {}; // Almacenará los colores ya utilizados
       let colorIndex = 0;  // Índice para recorrer la paleta de colores
+      legendContent.innerHTML = ''; // Limpiar leyenda
 
       data.forEach(function(row) {
         try {
@@ -331,6 +399,12 @@
           if (!usedColors[zone]) {
             usedColors[zone] = colorsPalette[colorIndex];
             colorIndex = (colorIndex + 1) % colorsPalette.length;
+
+            // Añadir el color a la leyenda
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+            legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${usedColors[zone]}"></span>${zone}`;
+            legendContent.appendChild(legendItem);
           }
 
           const leafletPolygon = L.polygon(coordinates, {
@@ -378,6 +452,17 @@
     // Limpiar los polígonos del mapa
     function clearMap() {
       polygonLayer.clearLayers();  // Elimina todos los polígonos existentes antes de agregar nuevos
+    }
+
+    // Mostrar/Ocultar la leyenda
+    function toggleLegend() {
+      legendPanel.classList.toggle('visible');
+      const legendButton = document.querySelector('.toggle-legend-btn');
+      if (legendPanel.classList.contains('visible')) {
+        legendButton.innerText = 'Ocultar Leyenda';
+      } else {
+        legendButton.innerText = 'Mostrar Leyenda';
+      }
     }
 
     function toggleSidebar() {
