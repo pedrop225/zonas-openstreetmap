@@ -30,7 +30,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1rem;
+      padding: 1rem;
       font-size: 1.8rem;
       font-weight: 600;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -41,7 +41,13 @@
       z-index: 1000;
     }
 
-    #toggleSidebarBtn, #toggleRightSidebarBtn {
+    #header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    #toggleSidebarBtn {
+      margin-right: 1rem;
       font-size: 18px;
       background-color: #3498db;
       color: white;
@@ -52,12 +58,23 @@
       transition: background-color 0.3s ease;
     }
 
-    #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
+    #toggleSidebarBtn:hover {
       background-color: #2980b9;
     }
 
     #toggleRightSidebarBtn {
-      margin-left: auto; /* Mueve el botón a la derecha */
+      font-size: 18px;
+      background-color: #3498db;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    #toggleRightSidebarBtn:hover {
+      background-color: #2980b9;
     }
 
     .map-container {
@@ -295,8 +312,10 @@
 <body>
 
   <header>
-    <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
-    <span>Visualización de Polígonos por Zona de Explotación</span>
+    <div id="header-left">
+      <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+      <span>Visualización de Polígonos por Zona de Explotación</span>
+    </div>
     <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
       <i class="fas fa-info-circle"></i>
     </button>
