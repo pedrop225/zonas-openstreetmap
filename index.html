@@ -329,66 +329,74 @@
       background-color: #3a4a5a;
     }
 
-    /* Botón de acción de la leyenda */
-    .toggle-legend-btn {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      background-color: #3498db;
-      color: white;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      font-size: 12px;
-      z-index: 1200;
-      transform: translateX(-50%);
-      transition: background-color 0.3s ease, bottom 0.3s ease;
-    }
-
-    .toggle-legend-btn:hover {
-      background-color: #2980b9;
-    }
-
-    /* Panel de leyenda */
+    /* Estilos para la leyenda */
     .legend-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: #f0f0f0;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-      display: none;
-      z-index: 1000;
-      overflow-y: auto;
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 220px;
+      background-color: rgba(44, 62, 80, 0.9); /* Fondo semitransparente */
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       padding: 10px;
-      text-align: center;
+      z-index: 1000;
     }
 
-    .legend-panel.visible {
-      display: block;
+    .legend-panel h3 {
+      margin-top: 0;
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    .legend-content {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 200px; /* Altura máxima antes de activar el scroll */
+      overflow-y: auto;
     }
 
     .legend-item {
-      display: inline-block;
-      margin: 0 10px;
-      padding: 5px;
-      font-size: 12px;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
       cursor: pointer;
+      padding: 5px;
+      border-radius: 5px;
+      transition: background-color 0.2s;
     }
 
-    .legend-item.selected {
-      border-bottom: 2px solid #3498db;
+    .legend-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
 
     .legend-color-box {
-      display: inline-block;
       width: 20px;
       height: 20px;
-      border-radius: 50%;
-      margin-right: 5px;
-      vertical-align: middle;
+      border-radius: 3px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .legend-item-text {
+      flex-grow: 1;
+      font-size: 14px;
+      color: white;
+    }
+
+    .legend-item.inactive .legend-color-box,
+    .legend-item.inactive .legend-item-text {
+      opacity: 0.5;
+    }
+
+    /* Ajustar posición de los controles de Leaflet */
+    .leaflet-top.leaflet-right {
+      top: 70px;
+      right: 70px;
     }
   </style>
 </head>
@@ -409,7 +417,7 @@
     <div class="file-upload-container">
       <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
       <input type="file" class="file-upload-input" id="fileInput" accept=".csv" />
-      <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i>No se ha seleccionado ningún archivo</p>
+      <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo</p>
     </div>
 
     <!-- Switch V. Inicial -->
@@ -444,14 +452,12 @@
     <div id="map" class="map"></div>
   </div>
 
-  <!-- Botón para mostrar la leyenda -->
-  <button class="toggle-legend-btn" id="toggleLegendBtn" onclick="toggleLegend()">Mostrar Leyenda</button>
-
-  <!-- Panel de leyenda oculto inicialmente -->
+  <!-- Leyenda siempre visible en el mapa -->
   <div id="legendPanel" class="legend-panel">
-    <div id="legendContent" class="legend-content">
-      <!-- Aquí se mostrarán los elementos de la leyenda -->
-    </div>
+    <h3>Leyenda de Zonas</h3>
+    <ul id="legendContent" class="legend-content">
+      <!-- Los elementos de la leyenda se generarán dinámicamente -->
+    </ul>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -469,7 +475,6 @@
     const summaryContent = document.getElementById('summaryContent');
     const mapContainer = document.getElementById('mapContainer');
     const header = document.querySelector("header");
-    const toggleLegendBtn = document.getElementById('toggleLegendBtn');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
@@ -539,7 +544,6 @@
 
       let usedColors = {}; // Almacenará los colores ya utilizados
       let colorIndex = 0;  // Índice para recorrer la paleta de colores
-      legendContent.innerHTML = ''; // Limpiar leyenda
 
       let zonesWithColors = []; // Array para almacenar zonas y colores, para ordenarlos
       polygonsByZone = {}; // Reiniciar para almacenar los polígonos por zona
@@ -604,29 +608,73 @@
         }
       });
 
-      // Ordenar las zonas alfabéticamente y añadirlas a la leyenda
-      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone)).forEach(item => {
-        const legendItem = document.createElement('div');
+      // Ordenar las zonas alfabéticamente y generar la leyenda
+      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone));
+
+      legendContent.innerHTML = ''; // Limpiar leyenda
+
+      // Crear un objeto para rastrear la visibilidad de las zonas
+      let zonesVisibility = {};
+
+      zonesWithColors.forEach(item => {
+        const legendItem = document.createElement('li');
         legendItem.className = 'legend-item';
-        legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${item.color}"></span>${item.zone}`;
+        
+        const colorBox = document.createElement('span');
+        colorBox.className = 'legend-color-box';
+        colorBox.style.backgroundColor = item.color;
+        
+        const itemText = document.createElement('span');
+        itemText.className = 'legend-item-text';
+        itemText.textContent = item.zone;
+        
+        legendItem.appendChild(colorBox);
+        legendItem.appendChild(itemText);
+        
         legendItem.setAttribute('data-zone', item.zone); // Añadir el atributo de zona
 
-        // Añadir evento de clic para centrar la zona correspondiente en el mapa
+        // Inicializar visibilidad
+        zonesVisibility[item.zone] = true;
+
+        // Añadir evento de clic para mostrar/ocultar zonas
         legendItem.addEventListener('click', function() {
-          // Quitar la clase "selected" de otros elementos
-          document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('selected'));
-
-          // Añadir la clase "selected" al elemento clicado
-          this.classList.add('selected');
-
-          // Obtener la zona y centrarla
           const zone = this.getAttribute('data-zone');
-          const zonePolygons = polygonsByZone[zone];
-          
-          if (zonePolygons && zonePolygons.length > 0) {
-            const group = L.featureGroup(zonePolygons); // Crear un grupo de polígonos
-            map.fitBounds(group.getBounds()); // Centrar y ajustar el mapa a los límites de los polígonos
-          }
+          const isVisible = zonesVisibility[zone];
+          zonesVisibility[zone] = !isVisible;
+
+          // Mostrar u ocultar los polígonos correspondientes
+          polygonsByZone[zone].forEach(polygon => {
+            if (zonesVisibility[zone]) {
+              polygon.addTo(polygonLayer);
+              legendItem.classList.remove('inactive');
+            } else {
+              polygonLayer.removeLayer(polygon);
+              legendItem.classList.add('inactive');
+            }
+          });
+        });
+
+        // Añadir evento para resaltar zona al pasar el ratón
+        legendItem.addEventListener('mouseover', function() {
+          const zone = this.getAttribute('data-zone');
+          polygonsByZone[zone].forEach(polygon => {
+            polygon.setStyle({
+              weight: 5,
+              color: '#fff',
+              fillOpacity: 0.7,
+            });
+          });
+        });
+
+        legendItem.addEventListener('mouseout', function() {
+          const zone = this.getAttribute('data-zone');
+          polygonsByZone[zone].forEach(polygon => {
+            polygon.setStyle({
+              weight: 2,
+              color: usedColors[zone],
+              fillOpacity: 0.4,
+            });
+          });
         });
 
         legendContent.appendChild(legendItem);
@@ -723,19 +771,6 @@
       }
     }
 
-    // Mostrar/Ocultar la leyenda (incluyendo tu corrección)
-    function toggleLegend() {
-      legendPanel.classList.toggle('visible');
-      const legendButton = document.querySelector('.toggle-legend-btn');
-      if (legendPanel.classList.contains('visible')) {
-        legendButton.innerText = 'Ocultar Leyenda';
-        legendButton.style.bottom = `${legendPanel.offsetHeight + 12}px`; // Ajusta el botón para que esté por encima del panel
-      } else {
-        legendButton.innerText = 'Mostrar Leyenda';
-        legendButton.style.bottom = '12px'; // Posición original del botón
-      }
-    }
-
     function toggleSidebar() {
       sidebar.classList.toggle('visible');
 
@@ -755,13 +790,12 @@
       mapContainer.classList.toggle('blur', isRightSidebarVisible);
       header.classList.toggle('blur', isRightSidebarVisible);
       sidebar.classList.toggle('blur', isRightSidebarVisible);
-      legendPanel.classList.toggle('blur', isRightSidebarVisible);
 
       const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
       if (rightSidebar.classList.contains('visible')) {
         leafletControls.style.right = '590px'; // Ajustar cuando la barra derecha esté visible
       } else {
-        leafletControls.style.right = '50px';  // Ajustar cuando la barra derecha esté oculta
+        leafletControls.style.right = '70px';  // Ajustar cuando la barra derecha esté oculta
       }
     }
 
