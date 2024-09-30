@@ -358,12 +358,12 @@
             });
           });
 
-          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación, Poliza ZE. Sección Censal y Póliza
+          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación, Pólizas ZE. Sección Censal, y Pólizas
           leafletPolygon.bindPopup(`
             <b>Sección Censal:</b> ${sectionCensal}<br>
             <b>Zona de Explotación:</b> ${zone}<br>
-            <b>Poliza ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
-            <b>Póliza:</b> ${poliza}
+            <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
+            <b>Pólizas:</b> ${poliza}
           `);
         } catch (error) {
           console.error("Error al procesar el polígono:", error);
