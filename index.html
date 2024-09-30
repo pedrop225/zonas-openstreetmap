@@ -332,8 +332,8 @@
     /* Estilos para la leyenda */
     .legend-panel {
       position: absolute;
-      bottom: 20px;
-      right: 20px;
+      top: 20px;
+      left: 20px;
       width: 220px;
       background-color: rgba(44, 62, 80, 0.9); /* Fondo semitransparente */
       color: white;
@@ -341,6 +341,10 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       padding: 10px;
       z-index: 1000;
+      resize: both;
+      overflow: auto;
+      min-width: 150px;
+      min-height: 100px;
     }
 
     .legend-panel h3 {
@@ -350,6 +354,7 @@
       margin-bottom: 10px;
       border-bottom: 1px solid #ccc;
       padding-bottom: 5px;
+      cursor: move; /* Indica que el elemento es movible */
     }
 
     .legend-content {
@@ -438,6 +443,15 @@
       <span class="switch-label">V. Final</span>
     </div>
 
+    <!-- Switch Mostrar Leyenda -->
+    <div class="switch-container">
+      <label class="switch">
+        <input type="checkbox" id="toggleLegendSwitch" checked>
+        <span class="slider"></span>
+      </label>
+      <span class="switch-label">Mostrar Leyenda</span>
+    </div>
+
   </div>
 
   <!-- Barra lateral derecha -->
@@ -452,7 +466,7 @@
     <div id="map" class="map"></div>
   </div>
 
-  <!-- Leyenda siempre visible en el mapa -->
+  <!-- Leyenda movible y redimensionable -->
   <div id="legendPanel" class="legend-panel">
     <h3>Leyenda de Zonas</h3>
     <ul id="legendContent" class="legend-content">
@@ -466,6 +480,7 @@
   <script>
     const vInicialSwitch = document.getElementById('vInicialSwitch');
     const vFinalSwitch = document.getElementById('vFinalSwitch');
+    const toggleLegendSwitch = document.getElementById('toggleLegendSwitch');
     const sidebar = document.getElementById('sidebar');
     const rightSidebar = document.getElementById('rightSidebar');
     const fileInput = document.getElementById('fileInput');
@@ -797,6 +812,52 @@
       } else {
         leafletControls.style.right = '70px';  // Ajustar cuando la barra derecha esté oculta
       }
+    }
+
+    // Mostrar/Ocultar la leyenda
+    toggleLegendSwitch.addEventListener('change', function() {
+      if (toggleLegendSwitch.checked) {
+        legendPanel.style.display = 'block';
+      } else {
+        legendPanel.style.display = 'none';
+      }
+    });
+
+    // Hacer la leyenda movible
+    legendPanel.addEventListener('mousedown', dragMouseDown);
+
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    function dragMouseDown(e) {
+      e = e || window.event;
+      if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
+        e.preventDefault();
+        // Obtener la posición inicial del cursor
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // Llamar a la función cada vez que el cursor se mueve
+        document.onmousemove = elementDrag;
+      }
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // Calcular la nueva posición del cursor
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // Establecer la nueva posición del elemento
+      legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
+      legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+      // Detener el movimiento cuando se suelta el botón del ratón
+      document.onmouseup = null;
+      document.onmousemove = null;
     }
 
     // Configuración inicial: solo "V. Inicial" activado
