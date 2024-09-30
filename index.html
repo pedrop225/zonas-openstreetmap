@@ -363,6 +363,16 @@
   <script>
     const popupOverlay = document.getElementById('popupOverlay');
     const summaryTable = document.getElementById('summaryTable');
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+
+    // Inicializar el mapa
+    let map = L.map('map').setView([28.0665, -16.7332], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
+      maxZoom: 18,
+    }).addTo(map);
 
     let csvData = [
       // Simulación de datos
@@ -373,6 +383,7 @@
       { "ZE. Zona de Explotación": "103940007", "ZE. Sección Censal": "3800201001", "Pol. ZE. Zona de Explotación": "206" }
     ];
 
+    // Mostrar resumen
     function showSummary() {
       const zones = {};
 
@@ -438,8 +449,13 @@
       popupOverlay.style.display = 'none';  // Ocultar el popup
     }
 
-    // Llamar a showSummary() para simular la apertura del resumen en un entorno real
-    showSummary();
+    // Escuchar evento de archivo cargado para mostrar nombre
+    fileInput.addEventListener('change', function () {
+      if (fileInput.files.length > 0) {
+        fileName.textContent = fileInput.files[0].name;
+      }
+    });
+
   </script>
 
 </body>
