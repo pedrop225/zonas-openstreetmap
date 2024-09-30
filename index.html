@@ -379,91 +379,70 @@
       maxZoom: 18,
     }).addTo(map);
 
-    let csvData = [
-      // Simulación de datos
-      { "ZE. Zona de Explotación": "103940004", "ZE. Sección Censal": "3800101001", "Pol. ZE. Zona de Explotación": "70" },
-      { "ZE. Zona de Explotación": "103940004", "ZE. Sección Censal": "3800101002", "Pol. ZE. Zona de Explotación": "50" },
-      { "ZE. Zona de Explotación": "103940006", "ZE. Sección Censal": "3800101006", "Pol. ZE. Zona de Explotación": "25" },
-      { "ZE. Zona de Explotación": "103940006", "ZE. Sección Censal": "3800101009", "Pol. ZE. Zona de Explotación": "61" },
-      { "ZE. Zona de Explotación": "103940007", "ZE. Sección Censal": "3800201001", "Pol. ZE. Zona de Explotación": "206" }
-    ];
+    let polygonLayer = L.layerGroup().addTo(map);  // Almacena los polígonos
 
-    // Mostrar resumen
-    function showSummary() {
-      const zones = {};
-
-      // Agrupar los datos por Zona de Explotación
-      csvData.forEach(row => {
-        const zone = row['ZE. Zona de Explotación'];
-        const sectionCensal = row['ZE. Sección Censal'];
-        const polizas = row['Pol. ZE. Zona de Explotación'];
-
-        if (!zones[zone]) {
-          zones[zone] = { sections: [], totalPolizas: 0 };
+    // Función para cargar CSV y dibujar polígonos
+    function loadCSV(file) {
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          const data = results.data;
+          drawPolygons(data);
         }
-
-        zones[zone].sections.push({ sectionCensal, polizas });
-        zones[zone].totalPolizas += parseInt(polizas, 10);
       });
-
-      let summaryHtml = '';
-
-      // Generar las filas del resumen
-      for (const zone in zones) {
-        summaryHtml += `
-          <tr class="summary-row" onclick="toggleZoneDetails('${zone}')">
-            <td><span class="icon collapsed" id="icon-${zone}"></span>Total ${zone}</td>
-            <td>${zones[zone].totalPolizas}</td>
-          </tr>
-        `;
-
-        // Agregar las secciones censales como filas ocultas inicialmente
-        zones[zone].sections.forEach(section => {
-          summaryHtml += `
-            <tr class="expandable-row hidden" data-zone="${zone}">
-              <td>${section.sectionCensal}</td>
-              <td>${section.polizas}</td>
-            </tr>
-          `;
-        });
-      }
-
-      summaryTable.innerHTML = summaryHtml;
-      popupOverlay.classList.add('visible');  // Mostrar el popup
     }
 
-    function toggleZoneDetails(zone) {
-      const rows = document.querySelectorAll(`[data-zone="${zone}"]`);
-      const icon = document.getElementById(`icon-${zone}`);
+    // Dibujar polígonos en el mapa
+    function drawPolygons(data) {
+      polygonLayer.clearLayers();  // Limpiar los polígonos existentes
 
-      rows.forEach(row => {
-        row.classList.toggle('hidden');
+      const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF']; // Ejemplo de colores para zonas
+
+      data.forEach((row, index) => {
+        if (row.Poligon) {
+          try {
+            const polygonData = JSON.parse(row.Poligon); // Asegúrate de que esta columna exista
+            const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
+            const zoneColor = colors[index % colors.length];  // Alternar entre los colores
+
+            const polygon = L.polygon(coordinates, {
+              color: zoneColor,
+              fillOpacity: 0.5
+            }).addTo(polygonLayer);
+
+            // Asociar popup con información adicional
+            polygon.bindPopup(`
+              <b>Zona:</b> ${row['ZE. Zona de Explotación']}<br>
+              <b>Sección Censal:</b> ${row['ZE. Sección Censal']}<br>
+              <b>Pólizas:</b> ${row['Pol. ZE. Zona de Explotación']}
+            `);
+          } catch (error) {
+            console.error("Error al procesar el polígono", error);
+          }
+        }
       });
-
-      // Cambiar el ícono de expandir/colapsar
-      if (icon.classList.contains('collapsed')) {
-        icon.classList.remove('collapsed');
-        icon.classList.add('expanded');
-      } else {
-        icon.classList.remove('expanded');
-        icon.classList.add('collapsed');
-      }
     }
 
-    function closeSummary() {
-      popupOverlay.classList.remove('visible');  // Ocultar el popup
-    }
-
-    // Escuchar evento de archivo cargado para mostrar nombre
+    // Escuchar evento de archivo cargado
     fileInput.addEventListener('change', function () {
       if (fileInput.files.length > 0) {
         fileName.textContent = fileInput.files[0].name;
+        loadCSV(fileInput.files[0]);  // Cargar el CSV y dibujar los polígonos
       }
     });
 
     // Función para desplegar/ocultar la barra lateral
     function toggleSidebar() {
       sidebar.classList.toggle('visible');
+    }
+
+    // Mostrar resumen
+    function showSummary() {
+      popupOverlay.classList.add('visible');  // Mostrar el popup
+    }
+
+    function closeSummary() {
+      popupOverlay.classList.remove('visible');  // Ocultar el popup
     }
 
   </script>
