@@ -37,7 +37,7 @@
       z-index: 1000;
     }
 
-    #toggleSidebarBtn {
+    #toggleSidebarBtn, #toggleRightSidebarBtn {
       margin-right: 1rem;
       font-size: 18px;
       background-color: #3498db;
@@ -49,7 +49,7 @@
       transition: background-color 0.3s ease;
     }
 
-    #toggleSidebarBtn:hover {
+    #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
       background-color: #2980b9;
     }
 
@@ -64,9 +64,10 @@
       margin: 0;
     }
 
+    /* Barra lateral izquierda */
     .sidebar {
       height: 100vh;
-      width: 220px;
+      width: 180px;
       position: fixed;
       top: 80px;
       left: 0;
@@ -74,7 +75,7 @@
       color: white;
       padding: 15px;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      transform: translateX(-220px);
+      transform: translateX(-180px);
       transition: transform 0.3s ease;
       z-index: 999;
     }
@@ -84,6 +85,32 @@
     }
 
     .sidebar h2 {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    /* Barra lateral derecha */
+    .right-sidebar {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      top: 80px;
+      right: 0;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 15px;
+      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+      transform: translateX(250px);
+      transition: transform 0.3s ease;
+      z-index: 999;
+    }
+
+    .right-sidebar.visible {
+      transform: translateX(0);
+    }
+
+    .right-sidebar h2 {
       font-size: 1.1rem;
       margin-bottom: 15px;
       text-align: left;
@@ -194,10 +221,15 @@
       transform: translateX(14px);
     }
 
-    /* Ajuste de posición para los controles del mapa para evitar solapamiento con la barra lateral */
+    /* Ajuste de posición para los controles del mapa para evitar solapamiento con las barras laterales */
     .leaflet-top.leaflet-left {
-      left: 70px; /* Mantener la misma distancia en todo momento */
+      left: 50px; /* Ajustar para evitar la superposición con la barra lateral izquierda */
       transition: left 0.3s ease;
+    }
+
+    .leaflet-top.leaflet-right {
+      right: 50px; /* Ajustar para evitar la superposición con la barra lateral derecha */
+      transition: right 0.3s ease;
     }
 
     /* Panel de leyenda inferior */
@@ -265,118 +297,23 @@
       background-color: #2980b9;
     }
 
-    /* Popup de resumen */
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: none;
-      z-index: 1500;
-      justify-content: center;
-      align-items: center;
+    .summary-item {
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #555;
     }
 
-    .popup-content {
-      background-color: white;
-      padding: 20px;
-      width: 80%;
-      max-width: 600px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-
-    .popup-content h3 {
-      margin-top: 0;
-      font-size: 1.5rem;
-      text-align: center;
-    }
-
-    .popup-close-btn {
-      background-color: #e74c3c;
-      color: white;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-      float: right;
-      margin-top: -20px;
-      margin-right: -20px;
-    }
-
-    .popup-close-btn:hover {
-      background-color: #c0392b;
-    }
-
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .summary-table th, .summary-table td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .summary-table th {
-      background-color: #3498db;
-      color: white;
+    .summary-item span {
       font-weight: bold;
+      color: #333;
     }
-
-    .summary-table td {
-      background-color: #f9f9f9;
-    }
-
-    .summary-row {
-      cursor: pointer;
-      background-color: #3498db;
-      color: white;
-    }
-
-    .summary-row:hover {
-      background-color: #2980b9;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .expandable-row {
-      padding-left: 30px;
-    }
-
-    .icon {
-      font-size: 1rem;
-      margin-right: 8px;
-    }
-
-    .icon.collapsed:before {
-      content: "+";
-    }
-
-    .icon.expanded:before {
-      content: "-";
-    }
-
-    /* Estilo del contenido borroso */
-    .blurred {
-      filter: blur(5px);
-      pointer-events: none;
-    }
-
   </style>
 </head>
 <body>
 
   <header>
     <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
+    <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">ℹ️</button>
     <span>Visualización de Polígonos por Zona de Explotación</span>
   </header>
 
@@ -407,24 +344,18 @@
       <span class="switch-label">V. Final</span>
     </div>
 
-    <!-- Botón para mostrar el resumen -->
-    <button class="file-upload-button" onclick="showSummary()">Mostrar Resumen</button>
+  </div>
 
+  <!-- Nueva barra lateral derecha -->
+  <div class="right-sidebar" id="rightSidebar">
+    <h2>Resumen</h2>
+    <div id="summaryContent">
+      <!-- Aquí se mostrará el resumen dinámico -->
+    </div>
   </div>
 
   <div id="mapContainer" class="map-container">
     <div id="map" class="map"></div>
-  </div>
-
-  <!-- Popup de resumen -->
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="popup-content">
-      <button class="popup-close-btn" onclick="closeSummary()">X</button>
-      <h3>Resumen de Zonas</h3>
-      <table class="summary-table" id="summaryTable">
-        <!-- Aquí se insertará dinámicamente el contenido del resumen -->
-      </table>
-    </div>
   </div>
 
   <!-- Botón para mostrar la leyenda -->
@@ -442,13 +373,19 @@
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
   <script>
-    const popupOverlay = document.getElementById('popupOverlay');
-    const summaryTable = document.getElementById('summaryTable');
-    const mapContainer = document.getElementById('mapContainer');
+    const vInicialSwitch = document.getElementById('vInicialSwitch');
+    const vFinalSwitch = document.getElementById('vFinalSwitch');
     const sidebar = document.getElementById('sidebar');
+    const rightSidebar = document.getElementById('rightSidebar');
     const fileInput = document.getElementById('fileInput');
-    let csvData = [];
-    let polygonsByZone = {}; // Guardar los polígonos por zona
+    const fileName = document.getElementById('fileName');
+    const legendPanel = document.getElementById('legendPanel');
+    const legendContent = document.getElementById('legendContent');
+    const toggleLegendBtn = document.getElementById('toggleLegendBtn');
+    const summaryContent = document.getElementById('summaryContent');
+    let csvData = null; // Variable para almacenar los datos CSV en memoria
+
+    let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
 
     // Inicializar el mapa
     let map = L.map('map').setView([28.0665, -16.7332], 13);
@@ -458,71 +395,136 @@
       maxZoom: 18,
     }).addTo(map);
 
-    let polygonLayer = L.featureGroup().addTo(map);
+    let polygonLayer = L.featureGroup().addTo(map); // Mover aquí la inicialización de polygonLayer
+
+    // Manejar cambios de interruptores
+    vInicialSwitch.addEventListener('change', handleSwitchChange);
+    vFinalSwitch.addEventListener('change', handleSwitchChange);
+
+    function handleSwitchChange() {
+      if (this === vInicialSwitch && vInicialSwitch.checked) {
+        vFinalSwitch.checked = false;
+      } else if (this === vFinalSwitch && vFinalSwitch.checked) {
+        vInicialSwitch.checked = false;
+      }
+
+      if (csvData) {
+        clearMap();  // Limpiar los polígonos antes de dibujar nuevamente
+        processCSVData(csvData);  // Redibujar polígonos
+        updateSummary(csvData);  // Actualizar el resumen en la barra lateral derecha
+      }
+    }
 
     fileInput.addEventListener('change', handleFileSelection);
 
     function handleFileSelection() {
-      const file = fileInput.files[0];
-      if (file) {
-        Papa.parse(file, {
-          header: true,
-          complete: function(results) {
-            csvData = results.data;
-            fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
-            alert("Archivo CSV cargado correctamente.");
-            drawPolygons(); // Dibujar los polígonos después de cargar los datos
-          },
-          error: function(error) {
-            console.error("Error al procesar el CSV:", error);
-            alert("Error al cargar el archivo CSV.");
-          }
-        });
+      if (fileInput.files.length) {
+        fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${fileInput.files[0].name}`;
+        loadCSV(fileInput.files[0]);
+      } else {
+        fileName.innerHTML = `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
       }
     }
 
-    function drawPolygons() {
-      polygonLayer.clearLayers(); // Limpiar los polígonos previos
+    function loadCSV(file) {
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          csvData = results.data;
+          clearMap(); // Limpiar los polígonos antes de dibujar
+          processCSVData(csvData); // Procesar los datos para dibujar el mapa
+          updateSummary(csvData);  // Actualizar el resumen en la barra lateral derecha
+        }
+      });
+    }
 
-      if (!csvData.length) {
-        return;
-      }
-
+    function processCSVData(data) {
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-      const colorsPalette = [
-        '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
-        '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
-        '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
-        '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
-      ];
+      const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
-      let usedColors = {};
-      let colorIndex = 0;
+      let usedColors = {}; // Almacenará los colores ya utilizados
+      let colorIndex = 0;  // Índice para recorrer la paleta de colores
+      legendContent.innerHTML = ''; // Limpiar leyenda
 
-      polygonsByZone = {};
+      let zonesWithColors = []; // Array para almacenar zonas y colores, para ordenarlos
+      polygonsByZone = {}; // Reiniciar para almacenar los polígonos por zona
 
-      csvData.forEach(row => {
-        const polygonData = JSON.parse(row['Poligon']);
-        const zone = row[zoneColumn];
-        const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir lat/long
+      data.forEach(function(row) {
+        try {
+          const polygonData = JSON.parse(row['Poligon']);
+          const sectionCensal = row['ZE. Sección Censal'];
+          const zone = row[zoneColumn];
+          const poliza = row[polizaColumn];
+          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
 
-        // Asignar un color único por zona
-        if (!usedColors[zone]) {
-          usedColors[zone] = colorsPalette[colorIndex];
-          colorIndex = (colorIndex + 1) % colorsPalette.length;
+          const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
+
+          // Asignar color único a la zona
+          if (!usedColors[zone]) {
+            usedColors[zone] = colorsPalette[colorIndex];
+            colorIndex = (colorIndex + 1) % colorsPalette.length;
+            zonesWithColors.push({ zone, color: usedColors[zone] }); // Almacenar zona y color
+          }
+
+          const leafletPolygon = L.polygon(coordinates, {
+            color: usedColors[zone],
+            fillColor: usedColors[zone],
+            fillOpacity: 0.4, 
+            weight: 2
+          }).addTo(polygonLayer);
+
+          // Guardar los polígonos por zona
+          if (!polygonsByZone[zone]) {
+            polygonsByZone[zone] = [];
+          }
+          polygonsByZone[zone].push(leafletPolygon);
+
+          leafletPolygon.on('mouseover', function () {
+            this.setStyle({
+              weight: 5,
+              color: '#666',
+              fillOpacity: 0.6,
+              fillColor: usedColors[zone]
+            });
+          });
+
+          leafletPolygon.on('mouseout', function () {
+            this.setStyle({
+              weight: 2,
+              color: usedColors[zone],
+              fillOpacity: 0.4
+            });
+          });
+
+          leafletPolygon.bindPopup(`
+            <b>Sección Censal:</b> ${sectionCensal}<br>
+            <b>Zona de Explotación:</b> ${zone}<br>
+            <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
+            <b>Pólizas:</b> ${poliza}
+          `);
+        } catch (error) {
+          console.error("Error al procesar el polígono:", error);
         }
+      });
 
-        const leafletPolygon = L.polygon(coordinates, {
-          color: usedColors[zone],
-          fillColor: usedColors[zone],
-          fillOpacity: 0.5,
-          weight: 2
-        }).addTo(polygonLayer);
+      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone)).forEach(item => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${item.color}"></span>${item.zone}`;
+        legendItem.setAttribute('data-zone', item.zone);
 
-        if (!polygonsByZone[zone]) {
-          polygonsByZone[zone] = [];
-        }
-        polygonsByZone[zone].push(leafletPolygon);
+        legendItem.addEventListener('click', function() {
+          document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('selected'));
+          this.classList.add('selected');
+          const zone = this.getAttribute('data-zone');
+          const zonePolygons = polygonsByZone[zone];
+          if (zonePolygons && zonePolygons.length > 0) {
+            const group = L.featureGroup(zonePolygons);
+            map.fitBounds(group.getBounds());
+          }
+        });
+
+        legendContent.appendChild(legendItem);
       });
 
       if (polygonLayer.getLayers().length > 0) {
@@ -530,88 +532,63 @@
       }
     }
 
-    function showSummary() {
-      if (!csvData.length) {
-        alert("Por favor, carga un archivo CSV antes de mostrar el resumen.");
-        return;
-      }
-
-      const zones = {};
-
-      csvData.forEach(row => {
-        const zone = row['ZE. Zona de Explotación'];
-        const sectionCensal = row['ZE. Sección Censal'];
-        const polizas = row['Pol. ZE. Zona de Explotación'];
-
-        if (!zones[zone]) {
-          zones[zone] = { sections: [], totalPolizas: 0 };
-        }
-
-        zones[zone].sections.push({ sectionCensal, polizas });
-        zones[zone].totalPolizas += parseInt(polizas, 10);
-      });
-
-      let summaryHtml = '';
-
-      for (const zone in zones) {
-        summaryHtml += `
-          <tr class="summary-row" onclick="toggleZoneDetails('${zone}')">
-            <td><span class="icon collapsed" id="icon-${zone}"></span>Total ${zone}</td>
-            <td>${zones[zone].totalPolizas}</td>
-          </tr>
-        `;
-
-        zones[zone].sections.forEach(section => {
-          summaryHtml += `
-            <tr class="expandable-row hidden" data-zone="${zone}">
-              <td>${section.sectionCensal}</td>
-              <td>${section.polizas}</td>
-            </tr>
-          `;
-        });
-      }
-
-      summaryTable.innerHTML = summaryHtml;
-      popupOverlay.style.display = 'flex';  // Mostrar el popup
-      mapContainer.classList.add('blurred');  // Añadir el blur al mapa
-      sidebar.classList.add('blurred');  // Añadir el blur a la barra lateral
+    // Limpiar los polígonos del mapa
+    function clearMap() {
+      polygonLayer.clearLayers();
     }
 
-    function toggleZoneDetails(zone) {
-      const rows = document.querySelectorAll(`[data-zone="${zone}"]`);
-      const icon = document.getElementById(`icon-${zone}`);
-
-      rows.forEach(row => {
-        row.classList.toggle('hidden');
-      });
-
-      if (icon.classList.contains('collapsed')) {
-        icon.classList.remove('collapsed');
-        icon.classList.add('expanded');
-      } else {
-        icon.classList.remove('expanded');
-        icon.classList.add('collapsed');
-      }
-    }
-
-    function closeSummary() {
-      popupOverlay.style.display = 'none';
-      mapContainer.classList.remove('blurred');
-      sidebar.classList.remove('blurred');
-    }
-
-    function toggleSidebar() {
-      sidebar.classList.toggle('visible');
-    }
-
+    // Mostrar/Ocultar la leyenda
     function toggleLegend() {
-      const legendPanel = document.getElementById('legendPanel');
       legendPanel.classList.toggle('visible');
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
+        legendButton.style.bottom = (legendPanel.offsetHeight + 20) + 'px';
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
+        legendButton.style.bottom = '20px';
+      }
+    }
+
+    // Mostrar/Ocultar la barra lateral derecha
+    function toggleRightSidebar() {
+      rightSidebar.classList.toggle('visible');
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
+      if (rightSidebar.classList.contains('visible')) {
+        leafletControls.style.right = '300px';
+      } else {
+        leafletControls.style.right = '50px';
+      }
+    }
+
+    // Actualizar el resumen en la barra lateral derecha
+    function updateSummary(data) {
+      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+      summaryContent.innerHTML = ''; // Limpiar el contenido anterior
+
+      const zonesSummary = {}; // Almacenar resumen de zonas, secciones y pólizas
+
+      data.forEach(function(row) {
+        const zone = row[zoneColumn];
+        const sectionCensal = row['ZE. Sección Censal'];
+        const poliza = row['Pol. ZE. Sección Censal'];
+
+        if (!zonesSummary[zone]) {
+          zonesSummary[zone] = { secciones: 0, polizas: 0 };
+        }
+
+        zonesSummary[zone].secciones += 1;
+        zonesSummary[zone].polizas += parseInt(poliza || '0', 10); // Sumar pólizas
+      });
+
+      // Mostrar resumen en la barra lateral derecha
+      for (const zone in zonesSummary) {
+        const item = document.createElement('div');
+        item.className = 'summary-item';
+        item.innerHTML = `
+          <span>${zone}</span>: ${zonesSummary[zone].secciones} Secciones Censales, ${zonesSummary[zone].polizas} Pólizas
+        `;
+        summaryContent.appendChild(item);
       }
     }
   </script>
