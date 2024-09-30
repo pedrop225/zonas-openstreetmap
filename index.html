@@ -8,9 +8,6 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   
-  <!-- Google Fonts -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" />
-
   <!-- Estilos propios -->
   <style>
     body {
@@ -194,12 +191,6 @@
       transform: translateX(14px);
     }
 
-    /* Ajuste de posición para los controles del mapa para evitar solapamiento con la barra lateral */
-    .leaflet-top.leaflet-left {
-      left: 50px; /* Ajustar para evitar la superposición con la barra lateral */
-      transition: left 0.3s ease;
-    }
-
     /* Popup de resumen */
     .popup-overlay {
       position: fixed;
@@ -212,10 +203,6 @@
       z-index: 1500;
       justify-content: center;
       align-items: center;
-    }
-
-    .popup-overlay.visible {
-      display: flex;
     }
 
     .popup-content {
@@ -252,6 +239,7 @@
       background-color: #c0392b;
     }
 
+    /* Estructura de la tabla */
     .summary-table {
       width: 100%;
       border-collapse: collapse;
@@ -273,6 +261,7 @@
       background-color: #f9f9f9;
     }
 
+    /* Fila expandible/colapsable */
     .summary-row {
       cursor: pointer;
       background-color: #3498db;
@@ -302,6 +291,12 @@
 
     .icon.expanded:before {
       content: "-";
+    }
+
+    /* Estilo del contenido borroso */
+    .blurred {
+      filter: blur(5px);
+      pointer-events: none;
     }
 
   </style>
@@ -367,82 +362,84 @@
   <script>
     const popupOverlay = document.getElementById('popupOverlay');
     const summaryTable = document.getElementById('summaryTable');
-    const fileInput = document.getElementById('fileInput');
-    const fileName = document.getElementById('fileName');
+    const mapContainer = document.getElementById('mapContainer');
     const sidebar = document.getElementById('sidebar');
+    let csvData = [
+      // Simulación de datos
+      { "ZE. Zona de Explotación": "103940004", "ZE. Sección Censal": "3800101001", "Pol. ZE. Zona de Explotación": "70" },
+      { "ZE. Zona de Explotación": "103940004", "ZE. Sección Censal": "3800101002", "Pol. ZE. Zona de Explotación": "50" },
+      { "ZE. Zona de Explotación": "103940006", "ZE. Sección Censal": "3800101006", "Pol. ZE. Zona de Explotación": "25" },
+      { "ZE. Zona de Explotación": "103940006", "ZE. Sección Censal": "3800101009", "Pol. ZE. Zona de Explotación": "61" },
+      { "ZE. Zona de Explotación": "103940007", "ZE. Sección Censal": "3800201001", "Pol. ZE. Zona de Explotación": "206" }
+    ];
 
-    // Inicializar el mapa
-    let map = L.map('map').setView([28.0665, -16.7332], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
-      maxZoom: 18,
-    }).addTo(map);
-
-    let polygonLayer = L.layerGroup().addTo(map);  // Almacena los polígonos
-
-    // Función para cargar CSV y dibujar polígonos
-    function loadCSV(file) {
-      Papa.parse(file, {
-        header: true,
-        complete: function(results) {
-          const data = results.data;
-          drawPolygons(data);
-        }
-      });
-    }
-
-    // Dibujar polígonos en el mapa
-    function drawPolygons(data) {
-      polygonLayer.clearLayers();  // Limpiar los polígonos existentes
-
-      const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF']; // Ejemplo de colores para zonas
-
-      data.forEach((row, index) => {
-        if (row.Poligon) {
-          try {
-            const polygonData = JSON.parse(row.Poligon); // Asegúrate de que esta columna exista
-            const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
-            const zoneColor = colors[index % colors.length];  // Alternar entre los colores
-
-            const polygon = L.polygon(coordinates, {
-              color: zoneColor,
-              fillOpacity: 0.5
-            }).addTo(polygonLayer);
-
-            // Asociar popup con información adicional
-            polygon.bindPopup(`
-              <b>Zona:</b> ${row['ZE. Zona de Explotación']}<br>
-              <b>Sección Censal:</b> ${row['ZE. Sección Censal']}<br>
-              <b>Pólizas:</b> ${row['Pol. ZE. Zona de Explotación']}
-            `);
-          } catch (error) {
-            console.error("Error al procesar el polígono", error);
-          }
-        }
-      });
-    }
-
-    // Escuchar evento de archivo cargado
-    fileInput.addEventListener('change', function () {
-      if (fileInput.files.length > 0) {
-        fileName.textContent = fileInput.files[0].name;
-        loadCSV(fileInput.files[0]);  // Cargar el CSV y dibujar los polígonos
-      }
-    });
-
-    // Función para desplegar/ocultar la barra lateral
-    function toggleSidebar() {
-      sidebar.classList.toggle('visible');
-    }
-
-    // Mostrar resumen
     function showSummary() {
-      popupOverlay.classList.add('visible');  // Mostrar el popup
+      const zones = {};
+
+      // Agrupar los datos por Zona de Explotación
+      csvData.forEach(row => {
+        const zone = row['ZE. Zona de Explotación'];
+        const sectionCensal = row['ZE. Sección Censal'];
+        const polizas = row['Pol. ZE. Zona de Explotación'];
+
+        if (!zones[zone]) {
+          zones[zone] = { sections: [], totalPolizas: 0 };
+        }
+
+        zones[zone].sections.push({ sectionCensal, polizas });
+        zones[zone].totalPolizas += parseInt(polizas, 10);
+      });
+
+      let summaryHtml = '';
+
+      // Generar las filas del resumen
+      for (const zone in zones) {
+        summaryHtml += `
+          <tr class="summary-row" onclick="toggleZoneDetails('${zone}')">
+            <td><span class="icon collapsed" id="icon-${zone}"></span>Total ${zone}</td>
+            <td>${zones[zone].totalPolizas}</td>
+          </tr>
+        `;
+
+        // Agregar las secciones censales como filas ocultas inicialmente
+        zones[zone].sections.forEach(section => {
+          summaryHtml += `
+            <tr class="expandable-row hidden" data-zone="${zone}">
+              <td>${section.sectionCensal}</td>
+              <td>${section.polizas}</td>
+            </tr>
+          `;
+        });
+      }
+
+      summaryTable.innerHTML = summaryHtml;
+      mapContainer.classList.add('blurred');  // Añadir el blur al mapa
+      sidebar.classList.add('blurred');  // Añadir el blur a la barra lateral
+      popupOverlay.style.display = 'flex';  // Mostrar el popup
+    }
+
+    function toggleZoneDetails(zone) {
+      const rows = document.querySelectorAll(`[data-zone="${zone}"]`);
+      const icon = document.getElementById(`icon-${zone}`);
+
+      rows.forEach(row => {
+        row.classList.toggle('hidden');
+      });
+
+      // Cambiar el ícono de expandir/colapsar
+      if (icon.classList.contains('collapsed')) {
+        icon.classList.remove('collapsed');
+        icon.classList.add('expanded');
+      } else {
+        icon.classList.remove('expanded');
+        icon.classList.add('collapsed');
+      }
     }
 
     function closeSummary() {
-      popupOverlay.classList.remove('visible');  // Ocultar el popup
+      mapContainer.classList.remove('blurred');  // Quitar el blur al mapa
+      sidebar.classList.remove('blurred');  // Quitar el blur a la barra lateral
+      popupOverlay.style.display = 'none';  // Ocultar el popup
     }
 
   </script>
