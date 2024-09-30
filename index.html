@@ -281,11 +281,11 @@
       left: 50%;
       background-color: #3498db;
       color: white;
-      padding: 8px 16px;
+      padding: 6px 12px; /* Reducir el padding */
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 12px; /* Reducir el tamaño de fuente */
       z-index: 1200; /* Asegura que esté por encima de otros elementos */
       transform: translateX(-50%);
       transition: background-color 0.3s ease, bottom 0.3s ease;
@@ -537,7 +537,7 @@
             });
           });
 
-          // Mostrar en el popup la información relevante: Sección Censal, Zona de Explotación, Pólizas ZE. Sección Censal, y Pólizas
+          // Mostrar en el popup la información relevante
           leafletPolygon.bindPopup(`
             <b>Sección Censal:</b> ${sectionCensal}<br>
             <b>Zona de Explotación:</b> ${zone}<br>
@@ -630,7 +630,7 @@
       }
     }
 
-    // Mostrar/Ocultar la leyenda
+    // Mostrar/Ocultar la leyenda (incluyendo tu corrección)
     function toggleLegend() {
       legendPanel.classList.toggle('visible');
       const legendButton = document.querySelector('.toggle-legend-btn');
