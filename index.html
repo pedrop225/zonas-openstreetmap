@@ -237,7 +237,7 @@
     /* Botón de acción de la leyenda ajustado a un tamaño más pequeño */
     .toggle-legend-btn {
       position: fixed;
-      bottom: 0;
+      bottom: 50px; /* Ajustado para no solaparse con la leyenda cuando está visible */
       left: 50%;
       transform: translateX(-50%);
       background-color: #3498db;
@@ -386,6 +386,8 @@
       let colorIndex = 0;  // Índice para recorrer la paleta de colores
       legendContent.innerHTML = ''; // Limpiar leyenda
 
+      let zonesWithColors = []; // Array para almacenar zonas y colores, para ordenarlos
+
       data.forEach(function(row) {
         try {
           const polygonData = JSON.parse(row['Poligon']);
@@ -400,12 +402,7 @@
           if (!usedColors[zone]) {
             usedColors[zone] = colorsPalette[colorIndex];
             colorIndex = (colorIndex + 1) % colorsPalette.length;
-
-            // Añadir el color a la leyenda
-            const legendItem = document.createElement('div');
-            legendItem.className = 'legend-item';
-            legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${usedColors[zone]}"></span>${zone}`;
-            legendContent.appendChild(legendItem);
+            zonesWithColors.push({ zone, color: usedColors[zone] }); // Almacenar zona y color
           }
 
           const leafletPolygon = L.polygon(coordinates, {
@@ -445,6 +442,14 @@
         }
       });
 
+      // Ordenar las zonas alfabéticamente y añadirlas a la leyenda
+      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone)).forEach(item => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${item.color}"></span>${item.zone}`;
+        legendContent.appendChild(legendItem);
+      });
+
       if (polygonLayer.getLayers().length > 0) {
         map.fitBounds(polygonLayer.getBounds());
       }
@@ -461,8 +466,10 @@
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
+        legendButton.style.bottom = '150px'; // Subir el botón para evitar solapamiento con la leyenda
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
+        legendButton.style.bottom = '50px'; // Restaurar posición del botón cuando la leyenda esté oculta
       }
     }
 
