@@ -237,7 +237,7 @@
     /* Botón de acción de la leyenda ajustado a un tamaño más pequeño */
     .toggle-legend-btn {
       position: fixed;
-      bottom: 20px; /* Separación constante del borde inferior */
+      bottom: 20px; /* Ajuste dinámico para separación constante del borde inferior */
       left: 50%;
       transform: translateX(-50%);
       background-color: #3498db;
@@ -248,6 +248,7 @@
       cursor: pointer;
       font-size: 12px; /* Fuente más pequeña */
       z-index: 1100;
+      transition: bottom 0.3s ease;
     }
 
     .toggle-legend-btn:hover {
@@ -297,7 +298,7 @@
   </div>
 
   <!-- Botón para mostrar la leyenda -->
-  <button class="toggle-legend-btn" onclick="toggleLegend()">Mostrar Leyenda</button>
+  <button class="toggle-legend-btn" id="toggleLegendBtn" onclick="toggleLegend()">Mostrar Leyenda</button>
 
   <!-- Panel de leyenda oculto inicialmente -->
   <div id="legendPanel" class="legend-panel">
@@ -318,6 +319,7 @@
     const fileName = document.getElementById('fileName');
     const legendPanel = document.getElementById('legendPanel');
     const legendContent = document.getElementById('legendContent');
+    const toggleLegendBtn = document.getElementById('toggleLegendBtn');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     // Manejar cambios de interruptores
@@ -465,8 +467,10 @@
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
+        legendButton.style.bottom = (legendPanel.offsetHeight + 20) + 'px'; // Mantener 20px de separación
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
+        legendButton.style.bottom = '20px'; // Mantener a 20px del borde inferior
       }
     }
 
