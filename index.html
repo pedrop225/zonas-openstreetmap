@@ -324,7 +324,10 @@
     <div id="header-left">
       <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
       <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
-        <i class="fas fa-info"></i> <!-- Solo el icono -->
+        <!-- Aquí intentamos cargar el icono. En caso de no cargarlo correctamente, añadimos el texto Info -->
+        <i class="fas fa-info"></i> <!-- Ícono de información -->
+        <!-- Si no se muestra el ícono, se puede usar el texto como alternativa -->
+        <!-- <span>Info</span> -->
       </button>
       <span>Visualización de Polígonos por Zona de Explotación</span>
     </div>
