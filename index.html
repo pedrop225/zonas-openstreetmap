@@ -67,8 +67,10 @@
       position: relative;
     }
 
+    /* Estilo para el icono del botón */
     #toggleRightSidebarBtn i {
-      margin-right: 5px; /* Ajusta la separación entre el icono y el texto */
+      font-size: 20px;
+      margin: 0;
     }
 
     /* Evitar el blur en el botón de la barra derecha */
@@ -322,7 +324,7 @@
     <div id="header-left">
       <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
       <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
-        <i class="fas fa-info"></i> Información
+        <i class="fas fa-info"></i> <!-- Solo el icono -->
       </button>
       <span>Visualización de Polígonos por Zona de Explotación</span>
     </div>
