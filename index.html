@@ -277,17 +277,18 @@
     /* Botón de acción de la leyenda */
     .toggle-legend-btn {
       position: fixed;
+      bottom: 20px; /* Establecer una distancia fija del fondo */
       left: 50%;
-      transform: translateX(-50%);
       background-color: #3498db;
       color: white;
-      padding: 6px 10px;
+      padding: 8px 16px;
       border: none;
       border-radius: 15px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 14px;
       z-index: 1200; /* Asegura que esté por encima de otros elementos */
-      transition: transform 0.3s ease, bottom 0.3s ease;
+      transform: translateX(-50%);
+      transition: background-color 0.3s ease, bottom 0.3s ease;
     }
 
     .toggle-legend-btn:hover {
@@ -630,10 +631,8 @@
       const legendButton = document.querySelector('.toggle-legend-btn');
       if (legendPanel.classList.contains('visible')) {
         legendButton.innerText = 'Ocultar Leyenda';
-        legendButton.style.bottom = (legendPanel.offsetHeight + 20) + 'px'; // Ajuste dinámico del botón
       } else {
         legendButton.innerText = 'Mostrar Leyenda';
-        legendButton.style.bottom = '20px'; // Siempre a 20px del borde inferior
       }
     }
 
