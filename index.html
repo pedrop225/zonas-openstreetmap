@@ -329,8 +329,17 @@
     const toggleLegendBtn = document.getElementById('toggleLegendBtn');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
-    let polygonLayer = L.featureGroup().addTo(map); // Se mueve para acceso global
-    let polygonsByZone = {}; // Nuevo objeto para almacenar polígonos por zona
+    let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
+
+    // Inicializar el mapa
+    let map = L.map('map').setView([28.0665, -16.7332], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
+      maxZoom: 18,
+    }).addTo(map);
+
+    let polygonLayer = L.featureGroup().addTo(map); // Mover aquí la inicialización de polygonLayer
 
     // Manejar cambios de interruptores
     vInicialSwitch.addEventListener('change', handleSwitchChange);
@@ -348,14 +357,6 @@
         processCSVData(csvData);  // Redibujar polígonos
       }
     }
-
-    // Inicializar el mapa
-    let map = L.map('map').setView([28.0665, -16.7332], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
-      maxZoom: 18,
-    }).addTo(map);
 
     fileInput.addEventListener('change', handleFileSelection);
 
