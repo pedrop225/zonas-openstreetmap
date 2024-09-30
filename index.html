@@ -206,13 +206,14 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      background-color: white;
-      box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
-      padding: 10px;
+      background-color: #ffffff;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+      padding: 15px;
       text-align: center;
       transition: transform 0.3s ease;
       transform: translateY(100%); /* Oculto inicialmente */
       z-index: 1000;
+      border-top: 2px solid #f4f4f9;
     }
 
     .legend-panel.visible {
@@ -235,10 +236,12 @@
 
     .legend-color-box {
       display: inline-block;
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       margin-right: 8px;
       vertical-align: middle;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     /* Botón de acción de la leyenda ajustado a un tamaño más pequeño */
