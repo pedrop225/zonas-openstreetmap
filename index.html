@@ -224,6 +224,13 @@
       margin-right: 20px;
       font-size: 14px;
       font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .legend-item.selected {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
 
     .legend-color-box {
@@ -322,6 +329,9 @@
     const toggleLegendBtn = document.getElementById('toggleLegendBtn');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
+    let polygonLayer = L.featureGroup().addTo(map); // Se mueve para acceso global
+    let polygonsByZone = {}; // Nuevo objeto para almacenar polígonos por zona
+
     // Manejar cambios de interruptores
     vInicialSwitch.addEventListener('change', handleSwitchChange);
     vFinalSwitch.addEventListener('change', handleSwitchChange);
@@ -346,8 +356,6 @@
       attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
       maxZoom: 18,
     }).addTo(map);
-
-    var polygonLayer = L.featureGroup().addTo(map);
 
     fileInput.addEventListener('change', handleFileSelection);
 
@@ -388,6 +396,7 @@
       legendContent.innerHTML = ''; // Limpiar leyenda
 
       let zonesWithColors = []; // Array para almacenar zonas y colores, para ordenarlos
+      polygonsByZone = {}; // Reiniciar para almacenar los polígonos por zona
 
       data.forEach(function(row) {
         try {
@@ -412,6 +421,12 @@
             fillOpacity: 0.4, // Ajuste de opacidad para mayor visibilidad del mapa
             weight: 2
           }).addTo(polygonLayer);
+
+          // Guardar los polígonos por zona
+          if (!polygonsByZone[zone]) {
+            polygonsByZone[zone] = [];
+          }
+          polygonsByZone[zone].push(leafletPolygon);
 
           // Agregar animaciones y mostrar información al pasar el ratón
           leafletPolygon.on('mouseover', function () {
@@ -448,6 +463,26 @@
         const legendItem = document.createElement('div');
         legendItem.className = 'legend-item';
         legendItem.innerHTML = `<span class="legend-color-box" style="background-color:${item.color}"></span>${item.zone}`;
+        legendItem.setAttribute('data-zone', item.zone); // Añadir el atributo de zona
+
+        // Añadir evento de clic para centrar la zona correspondiente en el mapa
+        legendItem.addEventListener('click', function() {
+          // Quitar la clase "selected" de otros elementos
+          document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('selected'));
+
+          // Añadir la clase "selected" al elemento clicado
+          this.classList.add('selected');
+
+          // Obtener la zona y centrarla
+          const zone = this.getAttribute('data-zone');
+          const zonePolygons = polygonsByZone[zone];
+          
+          if (zonePolygons && zonePolygons.length > 0) {
+            const group = L.featureGroup(zonePolygons); // Crear un grupo de polígonos
+            map.fitBounds(group.getBounds()); // Centrar y ajustar el mapa a los límites de los polígonos
+          }
+        });
+
         legendContent.appendChild(legendItem);
       });
 
