@@ -11,6 +11,9 @@
   <!-- Google Fonts -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" />
 
+  <!-- FontAwesome para los íconos -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
   <!-- Estilos propios -->
   <style>
     body {
@@ -26,6 +29,7 @@
       color: white;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       padding: 1rem 1rem;
       font-size: 1.8rem;
       font-weight: 600;
@@ -38,7 +42,6 @@
     }
 
     #toggleSidebarBtn, #toggleRightSidebarBtn {
-      margin-right: 1rem;
       font-size: 18px;
       background-color: #3498db;
       color: white;
@@ -51,6 +54,10 @@
 
     #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
       background-color: #2980b9;
+    }
+
+    #toggleRightSidebarBtn {
+      margin-left: auto; /* Mueve el botón a la derecha */
     }
 
     .map-container {
@@ -227,7 +234,7 @@
       background-color: #f0f0f0;
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
       padding: 15px;
-      text-align: center;
+      text-align: left; /* Alineado a la izquierda */
       transition: transform 0.3s ease;
       transform: translateY(100%); /* Oculto inicialmente */
       z-index: 1000;
@@ -290,7 +297,9 @@
   <header>
     <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
     <span>Visualización de Polígonos por Zona de Explotación</span>
-    <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">☰</button>
+    <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">
+      <i class="fas fa-info-circle"></i>
+    </button>
   </header>
 
   <!-- Barra lateral izquierda -->
@@ -345,7 +354,6 @@
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
   <script>
     const vInicialSwitch = document.getElementById('vInicialSwitch');
