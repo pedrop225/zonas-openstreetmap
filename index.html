@@ -273,6 +273,33 @@
     .summary-item p {
       margin: 0;
     }
+
+    /* Botón de acción de la leyenda */
+    .toggle-legend-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #3498db;
+      color: white;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 12px;
+      z-index: 1100;
+      transition: bottom 0.3s ease, transform 0.3s ease;
+    }
+
+    .toggle-legend-btn:hover {
+      background-color: #2980b9;
+    }
+
+    .legend-panel.visible + .toggle-legend-btn {
+      bottom: 100px; /* Mantener el botón por encima de la leyenda cuando esté visible */
+      transform: translateX(-50%);
+    }
+
   </style>
 </head>
 <body>
@@ -352,6 +379,7 @@
     const summaryContent = document.getElementById('summaryContent');
     const mapContainer = document.getElementById('mapContainer');
     const header = document.querySelector("header");
+    const toggleLegendBtn = document.getElementById('toggleLegendBtn');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
