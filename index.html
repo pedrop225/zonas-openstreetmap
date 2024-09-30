@@ -214,6 +214,10 @@
       align-items: center;
     }
 
+    .popup-overlay.visible {
+      display: flex;
+    }
+
     .popup-content {
       background-color: white;
       padding: 20px;
@@ -365,6 +369,7 @@
     const summaryTable = document.getElementById('summaryTable');
     const fileInput = document.getElementById('fileInput');
     const fileName = document.getElementById('fileName');
+    const sidebar = document.getElementById('sidebar');
 
     // Inicializar el mapa
     let map = L.map('map').setView([28.0665, -16.7332], 13);
@@ -424,7 +429,7 @@
       }
 
       summaryTable.innerHTML = summaryHtml;
-      popupOverlay.style.display = 'flex';  // Mostrar el popup
+      popupOverlay.classList.add('visible');  // Mostrar el popup
     }
 
     function toggleZoneDetails(zone) {
@@ -446,7 +451,7 @@
     }
 
     function closeSummary() {
-      popupOverlay.style.display = 'none';  // Ocultar el popup
+      popupOverlay.classList.remove('visible');  // Ocultar el popup
     }
 
     // Escuchar evento de archivo cargado para mostrar nombre
@@ -455,6 +460,11 @@
         fileName.textContent = fileInput.files[0].name;
       }
     });
+
+    // Función para desplegar/ocultar la barra lateral
+    function toggleSidebar() {
+      sidebar.classList.toggle('visible');
+    }
 
   </script>
 
