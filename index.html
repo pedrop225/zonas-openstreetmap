@@ -9,30 +9,30 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   
   <!-- Google Fonts -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap" />
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  
   <!-- FontAwesome para los íconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
+  
   <!-- Estilos propios -->
   <style>
     /* Estilos generales */
     body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f4f4f9;
-      color: #333;
+      font-family: 'Roboto', sans-serif;
+      background-color: #ecf0f1;
+      color: #2c3e50;
       margin: 0;
       padding: 0;
     }
 
     header {
-      background-color: #2c3e50;
+      background-color: #2980b9;
       color: white;
       display: flex;
       align-items: center;
       padding: 0.5rem 1rem;
       font-size: 1.2rem;
-      font-weight: 600;
+      font-weight: 500;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       position: fixed;
       top: 0;
@@ -59,7 +59,7 @@
     }
 
     #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
-      background-color: #2980b9;
+      background-color: #1abc9c;
     }
 
     #toggleRightSidebarBtn {
@@ -92,13 +92,14 @@
       top: 60px;
       left: 0;
       width: 200px;
-      background-color: #2c3e50;
+      background-color: #34495e;
       color: white;
       padding: 1rem;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       z-index: 999;
       display: none; /* Oculta la barra lateral por defecto */
       overflow-y: auto; /* Permite el scroll vertical */
+      transition: transform 0.3s ease;
     }
 
     .sidebar.visible {
@@ -138,29 +139,29 @@
     }
 
     .file-upload-button {
-      background-color: #3498db;
+      background-color: #e67e22;
       color: white;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 18px;
+      border-radius: 5px;
       font-size: 0.9rem;
       cursor: pointer;
       font-weight: 500;
       text-transform: uppercase;
-      box-shadow: 0 4px 10px rgba(52, 152, 219, 0.2);
+      box-shadow: 0 4px 10px rgba(230, 126, 34, 0.2);
       transition: background-color 0.3s ease, box-shadow 0.3s ease;
       width: 100%;
     }
 
     .file-upload-button:hover {
-      background-color: #2980b9;
-      box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+      background-color: #d35400;
+      box-shadow: 0 6px 15px rgba(211, 84, 0, 0.4);
     }
 
     .file-name {
       margin-top: 0.5rem;
       font-size: 0.8rem;
-      color: #ccc;
+      color: #bdc3c7;
       font-weight: 400;
       font-style: italic;
     }
@@ -199,7 +200,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: #bdc3c7;
       transition: .4s;
       border-radius: 20px;
     }
@@ -217,7 +218,7 @@
     }
 
     input:checked + .slider {
-      background-color: #2196F3;
+      background-color: #1abc9c;
     }
 
     input:checked + .slider:before {
@@ -232,14 +233,14 @@
       right: 0;
       width: 80%;
       max-width: 540px;
-      background-color: #2c3e50; /* Mismo fondo que la barra izquierda */
-      color: white; /* Texto en blanco */
+      background-color: #34495e;
+      color: white;
       padding: 0;
       box-shadow: -2px 0 5px rgba(0,0,0,0.1);
       z-index: 1100;
       transition: transform 0.3s ease;
-      transform: translateX(100%); /* Oculta inicialmente */
-      overflow-y: auto; /* Permite el scroll vertical */
+      transform: translateX(100%);
+      overflow-y: auto;
     }
 
     .right-sidebar.visible {
@@ -249,13 +250,13 @@
     .right-sidebar h2 {
       font-size: 1.2rem;
       font-weight: bold;
-      color: white; /* Texto en blanco */
+      color: white;
       margin: 0;
       padding: 1rem;
-      border-bottom: 1px solid #444;
+      border-bottom: 1px solid #2c3e50;
       position: sticky;
       top: 0;
-      background-color: #2c3e50; /* Mismo fondo que la barra derecha */
+      background-color: #34495e;
       z-index: 1;
     }
 
@@ -265,7 +266,7 @@
 
     /* Estilos para el resumen jerárquico */
     .summary-zone {
-      border-bottom: 1px solid #444;
+      border-bottom: 1px solid #2c3e50;
       padding: 1rem 0;
     }
 
@@ -276,6 +277,11 @@
       font-size: 1rem;
       font-weight: bold;
       color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    .summary-header:hover {
+      background-color: #2c3e50;
     }
 
     .toggle-button {
@@ -296,13 +302,13 @@
     .zone-total {
       margin-left: auto;
       font-weight: normal;
-      color: #ccc;
+      color: #bdc3c7;
     }
 
     .sections-container {
       margin-left: 1.5rem;
       padding-top: 0.5rem;
-      display: none; /* Inicialmente oculto */
+      display: none;
     }
 
     .summary-section {
@@ -312,10 +318,11 @@
       font-size: 0.9rem;
       cursor: pointer;
       color: white;
+      transition: background-color 0.3s ease;
     }
 
     .summary-section:hover {
-      background-color: #3a4a5a;
+      background-color: #2c3e50;
     }
 
     .section-name {
@@ -324,11 +331,7 @@
 
     .section-total {
       font-weight: normal;
-      color: #ccc;
-    }
-
-    .summary-header:hover {
-      background-color: #3a4a5a;
+      color: #bdc3c7;
     }
 
     /* Estilos para la leyenda */
@@ -338,7 +341,7 @@
       left: 10px;
       width: 80%;
       max-width: 220px;
-      background-color: rgba(44, 62, 80, 0.9); /* Fondo semitransparente */
+      background-color: rgba(52, 73, 94, 0.9);
       color: white;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -355,16 +358,17 @@
       font-size: 1rem;
       text-align: center;
       margin-bottom: 0.5rem;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid #bdc3c7;
       padding-bottom: 0.5rem;
-      cursor: move; /* Indica que el elemento es movible */
+      cursor: move;
+      font-weight: 500;
     }
 
     .legend-content {
       list-style: none;
       padding: 0;
       margin: 0;
-      max-height: 200px; /* Altura máxima antes de activar el scroll */
+      max-height: 200px;
       overflow-y: auto;
     }
 
@@ -387,7 +391,7 @@
       height: 20px;
       border-radius: 3px;
       margin-right: 0.5rem;
-      border: 1px solid #ccc;
+      border: 1px solid #bdc3c7;
     }
 
     .legend-item-text {
@@ -474,18 +478,18 @@
 
   <header>
     <div id="header-left">
-      <button id="toggleSidebarBtn" onclick="toggleSidebar()">☰</button>
-      <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()">Resumen</button>
+      <button id="toggleSidebarBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()"><i class="fas fa-list"></i> Resumen</button>
       <span>Visualización de Zonas de Explotación</span>
     </div>
   </header>
 
   <!-- Barra lateral izquierda -->
   <div class="sidebar" id="sidebar">
-    <h2>Opciones</h2>
+    <h2><i class="fas fa-cog"></i> Opciones</h2>
     
     <div class="file-upload-container">
-      <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
+      <label class="file-upload-button" for="fileInput"><i class="fas fa-upload"></i> Subir CSV</label>
       <input type="file" class="file-upload-input" id="fileInput" accept=".csv" />
       <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo</p>
     </div>
@@ -521,7 +525,7 @@
 
   <!-- Barra lateral derecha -->
   <div class="right-sidebar" id="rightSidebar">
-    <h2>Resumen de Zonas</h2>
+    <h2><i class="fas fa-chart-bar"></i> Resumen de Zonas</h2>
     <div id="summaryContent" class="summary-content">
       <!-- Resumen dinámico se cargará aquí -->
     </div>
@@ -618,10 +622,10 @@
 
       // Lista de colores predeterminados sin repetición
       const colorsPalette = [
-        '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
-        '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
-        '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
-        '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
+        '#3498db', '#e74c3c', '#1abc9c', '#9b59b6', '#f1c40f', '#e67e22',
+        '#2ecc71', '#34495e', '#d35400', '#7f8c8d', '#c0392b', '#2980b9', 
+        '#8e44ad', '#27ae60', '#f39c12', '#16a085', '#95a5a6', '#bdc3c7', 
+        '#2c3e50', '#ff6f61', '#6b5b95', '#88b04b', '#f7cac9', '#92a8d1', '#955251'
       ];
 
       let usedColors = {}; // Almacenará los colores ya utilizados
@@ -633,24 +637,24 @@
       data.forEach(function(row) {
         try {
           const polygonData = JSON.parse(row['Poligon']);
-          const sectionCensal = row['ZE. Sección Censal'];  // Columna con la Sección Censal
+          const sectionCensal = row['ZE. Sección Censal'];
           const zone = row[zoneColumn];
-          const poliza = row[polizaColumn];  // Seleccionar póliza según interruptor
-          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];  // Siempre se muestra esta columna
+          const poliza = row[polizaColumn];
+          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
 
-          const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]); // Invertir latitud y longitud
+          const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
 
           // Asignar color único a la zona
           if (!usedColors[zone]) {
             usedColors[zone] = colorsPalette[colorIndex];
             colorIndex = (colorIndex + 1) % colorsPalette.length;
-            zonesWithColors.push({ zone, color: usedColors[zone] }); // Almacenar zona y color
+            zonesWithColors.push({ zone, color: usedColors[zone] });
           }
 
           const leafletPolygon = L.polygon(coordinates, {
             color: usedColors[zone],
             fillColor: usedColors[zone],
-            fillOpacity: 0.4, // Ajuste de opacidad para mayor visibilidad del mapa
+            fillOpacity: 0.5,
             weight: 2
           }).addTo(polygonLayer);
 
@@ -664,8 +668,8 @@
           leafletPolygon.on('mouseover', function () {
             this.setStyle({
               weight: 5,
-              color: '#666',
-              fillOpacity: 0.6, // Al aumentar hover, dar más visibilidad al polígono
+              color: '#ecf0f1',
+              fillOpacity: 0.7,
               fillColor: usedColors[zone]
             });
           });
@@ -674,7 +678,7 @@
             this.setStyle({
               weight: 2,
               color: usedColors[zone],
-              fillOpacity: 0.4  // Restaurar opacidad al salir del hover
+              fillOpacity: 0.5
             });
           });
 
@@ -742,7 +746,7 @@
           polygonsByZone[zone].forEach(polygon => {
             polygon.setStyle({
               weight: 5,
-              color: '#fff',
+              color: '#ecf0f1',
               fillOpacity: 0.7,
             });
           });
@@ -754,7 +758,7 @@
             polygon.setStyle({
               weight: 2,
               color: usedColors[zone],
-              fillOpacity: 0.4,
+              fillOpacity: 0.5,
             });
           });
         });
@@ -769,7 +773,7 @@
 
     // Limpiar los polígonos del mapa
     function clearMap() {
-      polygonLayer.clearLayers();  // Elimina todos los polígonos existentes antes de agregar nuevos
+      polygonLayer.clearLayers();
     }
 
     // Generar el resumen dinámico en la barra derecha
@@ -786,7 +790,7 @@
         // Inicializar zona si no existe
         if (!summary[zone]) {
           summary[zone] = {
-            totalPolizasZona: polizaZona, // Asignamos el valor de pólizas de la zona
+            totalPolizasZona: polizaZona,
             secciones: {}
           };
         }
@@ -858,9 +862,9 @@
 
       const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
       if (sidebar.classList.contains('visible')) {
-        leafletControls.style.left = '220px'; // Ajustar cuando la barra esté visible
+        leafletControls.style.left = '220px';
       } else {
-        leafletControls.style.left = '10px';  // Ajustar cuando la barra esté oculta
+        leafletControls.style.left = '10px';
       }
     }
 
@@ -875,9 +879,9 @@
 
       const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
       if (rightSidebar.classList.contains('visible')) {
-        leafletControls.style.right = '590px'; // Ajustar cuando la barra derecha esté visible
+        leafletControls.style.right = '590px';
       } else {
-        leafletControls.style.right = '70px';  // Ajustar cuando la barra derecha esté oculta
+        leafletControls.style.right = '70px';
       }
     }
 
