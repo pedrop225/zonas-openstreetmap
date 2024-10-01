@@ -97,13 +97,13 @@
       padding: 1rem;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       z-index: 999;
-      display: none; /* Oculta la barra lateral por defecto */
-      overflow-y: auto; /* Permite el scroll vertical */
+      display: none;
+      overflow-y: auto;
       transition: transform 0.3s ease;
     }
 
     .sidebar.visible {
-      display: block; /* Muestra la barra lateral cuando es visible */
+      display: block;
     }
 
     .sidebar h2 {
@@ -119,12 +119,12 @@
 
     /* Botones de zoom ajustados para que nunca colapsen con la barra lateral */
     .leaflet-top.leaflet-left {
-      left: 10px; /* Espacio mínimo cuando la barra está oculta */
+      left: 10px;
       transition: left 0.3s ease;
     }
 
     .sidebar.visible ~ .leaflet-top.leaflet-left {
-      left: 220px; /* Ajuste dinámico para evitar colisión con la barra lateral */
+      left: 220px;
     }
 
     /* Botones y elementos de la barra lateral izquierda */
@@ -164,6 +164,13 @@
       color: #bdc3c7;
       font-weight: 400;
       font-style: italic;
+    }
+
+    /* Spinner de carga */
+    .spinner {
+      display: none;
+      margin-top: 1rem;
+      text-align: center;
     }
 
     /* Opciones para los interruptores */
@@ -405,6 +412,24 @@
       opacity: 0.5;
     }
 
+    /* Mensajes de notificación */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #27ae60;
+      color: white;
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 2000;
+    }
+
+    .notification.error {
+      background-color: #e74c3c;
+    }
+
     /* Ajustar posición de los controles de Leaflet */
     .leaflet-top.leaflet-right {
       top: 70px;
@@ -478,8 +503,8 @@
 
   <header>
     <div id="header-left">
-      <button id="toggleSidebarBtn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-      <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()"><i class="fas fa-list"></i> Resumen</button>
+      <button id="toggleSidebarBtn" onclick="toggleSidebar()" title="Mostrar/Ocultar Opciones"><i class="fas fa-bars"></i></button>
+      <button id="toggleRightSidebarBtn" onclick="toggleRightSidebar()" title="Mostrar/Ocultar Resumen"><i class="fas fa-list"></i> Resumen</button>
       <span>Visualización de Zonas de Explotación</span>
     </div>
   </header>
@@ -494,13 +519,18 @@
       <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo</p>
     </div>
 
+    <!-- Spinner de carga -->
+    <div class="spinner" id="loadingSpinner">
+      <i class="fas fa-spinner fa-spin fa-2x"></i>
+    </div>
+
     <!-- Switch V. Inicial -->
     <div class="switch-container">
       <label class="switch">
         <input type="checkbox" id="vInicialSwitch" checked>
         <span class="slider"></span>
       </label>
-      <span class="switch-label">V. Inicial</span>
+      <span class="switch-label" title="Ver zonas de explotación iniciales">V. Inicial</span>
     </div>
 
     <!-- Switch V. Final -->
@@ -509,7 +539,7 @@
         <input type="checkbox" id="vFinalSwitch">
         <span class="slider"></span>
       </label>
-      <span class="switch-label">V. Final</span>
+      <span class="switch-label" title="Ver zonas de explotación finales">V. Final</span>
     </div>
 
     <!-- Switch Mostrar Leyenda -->
@@ -543,6 +573,9 @@
     </ul>
   </div>
 
+  <!-- Notificaciones -->
+  <div id="notification" class="notification"></div>
+
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
@@ -561,6 +594,8 @@
     const summaryContent = document.getElementById('summaryContent');
     const mapContainer = document.getElementById('mapContainer');
     const header = document.querySelector("header");
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const notification = document.getElementById('notification');
     let csvData = null; // Variable para almacenar los datos CSV en memoria
 
     let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
@@ -569,11 +604,11 @@
     let map = L.map('map').setView([28.0665, -16.7332], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap',
+      attribution: 'Map data &copy; OpenStreetMap',
       maxZoom: 18,
     }).addTo(map);
 
-    let polygonLayer = L.featureGroup().addTo(map); // Mover aquí la inicialización de polygonLayer
+    let polygonLayer = L.featureGroup().addTo(map);
 
     // Manejar cambios de interruptores
     vInicialSwitch.addEventListener('change', handleSwitchChange);
@@ -587,9 +622,9 @@
       }
 
       if (csvData) {
-        clearMap();  // Limpiar los polígonos antes de dibujar nuevamente
-        processCSVData(csvData);  // Redibujar polígonos
-        generateSummary(csvData);  // Actualizar el resumen
+        clearMap();
+        processCSVData(csvData);
+        generateSummary(csvData);
       }
     }
 
@@ -597,21 +632,35 @@
 
     function handleFileSelection() {
       if (fileInput.files.length) {
-        fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${fileInput.files[0].name}`;
-        loadCSV(fileInput.files[0]);
+        const file = fileInput.files[0];
+        if (file.type !== 'text/csv') {
+          showNotification('Por favor, seleccione un archivo CSV válido.', 'error');
+          fileInput.value = '';
+          fileName.innerHTML = `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
+          return;
+        }
+        fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
+        loadCSV(file);
       } else {
         fileName.innerHTML = `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
       }
     }
 
     function loadCSV(file) {
+      loadingSpinner.style.display = 'block';
       Papa.parse(file, {
         header: true,
         complete: function(results) {
+          loadingSpinner.style.display = 'none';
+          if (results.errors.length > 0) {
+            showNotification('Error al procesar el archivo CSV.', 'error');
+            return;
+          }
           csvData = results.data;
-          clearMap(); // Limpiar los polígonos antes de dibujar
-          processCSVData(csvData); // Procesar los datos para dibujar el mapa
-          generateSummary(csvData);  // Generar resumen al cargar el archivo
+          clearMap();
+          processCSVData(csvData);
+          generateSummary(csvData);
+          showNotification('Archivo cargado exitosamente.');
         }
       });
     }
@@ -620,7 +669,6 @@
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
       const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
-      // Lista de colores predeterminados sin repetición
       const colorsPalette = [
         '#3498db', '#e74c3c', '#1abc9c', '#9b59b6', '#f1c40f', '#e67e22',
         '#2ecc71', '#34495e', '#d35400', '#7f8c8d', '#c0392b', '#2980b9', 
@@ -628,11 +676,11 @@
         '#2c3e50', '#ff6f61', '#6b5b95', '#88b04b', '#f7cac9', '#92a8d1', '#955251'
       ];
 
-      let usedColors = {}; // Almacenará los colores ya utilizados
-      let colorIndex = 0;  // Índice para recorrer la paleta de colores
+      let usedColors = {};
+      let colorIndex = 0;
 
-      let zonesWithColors = []; // Array para almacenar zonas y colores, para ordenarlos
-      polygonsByZone = {}; // Reiniciar para almacenar los polígonos por zona
+      let zonesWithColors = [];
+      polygonsByZone = {};
 
       data.forEach(function(row) {
         try {
@@ -644,7 +692,6 @@
 
           const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
 
-          // Asignar color único a la zona
           if (!usedColors[zone]) {
             usedColors[zone] = colorsPalette[colorIndex];
             colorIndex = (colorIndex + 1) % colorsPalette.length;
@@ -658,13 +705,11 @@
             weight: 2
           }).addTo(polygonLayer);
 
-          // Guardar los polígonos por zona
           if (!polygonsByZone[zone]) {
             polygonsByZone[zone] = [];
           }
           polygonsByZone[zone].push(leafletPolygon);
 
-          // Agregar animaciones y mostrar información al pasar el ratón
           leafletPolygon.on('mouseover', function () {
             this.setStyle({
               weight: 5,
@@ -682,7 +727,6 @@
             });
           });
 
-          // Mostrar en el popup la información relevante
           leafletPolygon.bindPopup(`
             <b>Sección Censal:</b> ${sectionCensal}<br>
             <b>Zona de Explotación:</b> ${zone}<br>
@@ -694,12 +738,18 @@
         }
       });
 
-      // Ordenar las zonas alfabéticamente y generar la leyenda
       zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone));
 
-      legendContent.innerHTML = ''; // Limpiar leyenda
+      generateLegend(zonesWithColors, usedColors);
 
-      // Crear un objeto para rastrear la visibilidad de las zonas
+      if (polygonLayer.getLayers().length > 0) {
+        map.fitBounds(polygonLayer.getBounds());
+      }
+    }
+
+    function generateLegend(zonesWithColors, usedColors) {
+      legendContent.innerHTML = '';
+
       let zonesVisibility = {};
 
       zonesWithColors.forEach(item => {
@@ -717,18 +767,15 @@
         legendItem.appendChild(colorBox);
         legendItem.appendChild(itemText);
         
-        legendItem.setAttribute('data-zone', item.zone); // Añadir el atributo de zona
+        legendItem.setAttribute('data-zone', item.zone);
 
-        // Inicializar visibilidad
         zonesVisibility[item.zone] = true;
 
-        // Añadir evento de clic para mostrar/ocultar zonas
         legendItem.addEventListener('click', function() {
           const zone = this.getAttribute('data-zone');
           const isVisible = zonesVisibility[zone];
           zonesVisibility[zone] = !isVisible;
 
-          // Mostrar u ocultar los polígonos correspondientes
           polygonsByZone[zone].forEach(polygon => {
             if (zonesVisibility[zone]) {
               polygon.addTo(polygonLayer);
@@ -740,7 +787,6 @@
           });
         });
 
-        // Añadir evento para resaltar zona al pasar el ratón
         legendItem.addEventListener('mouseover', function() {
           const zone = this.getAttribute('data-zone');
           polygonsByZone[zone].forEach(polygon => {
@@ -765,18 +811,12 @@
 
         legendContent.appendChild(legendItem);
       });
-
-      if (polygonLayer.getLayers().length > 0) {
-        map.fitBounds(polygonLayer.getBounds());
-      }
     }
 
-    // Limpiar los polígonos del mapa
     function clearMap() {
       polygonLayer.clearLayers();
     }
 
-    // Generar el resumen dinámico en la barra derecha
     function generateSummary(data) {
       const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
       const summary = {};
@@ -787,7 +827,6 @@
         const polizaSeccionCensal = parseInt(row['Pol. ZE. Sección Censal'] || 0);
         const polizaZona = parseInt(vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] || 0 : row['Pol. Nueva Zona'] || 0);
 
-        // Inicializar zona si no existe
         if (!summary[zone]) {
           summary[zone] = {
             totalPolizasZona: polizaZona,
@@ -795,7 +834,6 @@
           };
         }
 
-        // Inicializar sección censal si no existe
         if (!summary[zone].secciones[sectionCensal]) {
           summary[zone].secciones[sectionCensal] = {
             totalPolizasSeccion: polizaSeccionCensal
@@ -803,16 +841,12 @@
         }
       });
 
-      // Limpiar contenido anterior
       summaryContent.innerHTML = '';
 
-      // Crear estructura jerárquica
       for (const zone in summary) {
-        // Crear elemento para la zona
         const zoneItem = document.createElement('div');
         zoneItem.className = 'summary-zone';
 
-        // Encabezado de la zona con botón de expandir/contraer
         const zoneHeader = document.createElement('div');
         zoneHeader.className = 'summary-header';
         zoneHeader.innerHTML = `
@@ -822,12 +856,10 @@
         `;
         zoneItem.appendChild(zoneHeader);
 
-        // Contenedor para las secciones censales, inicialmente oculto
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'sections-container';
 
         for (const section in summary[zone].secciones) {
-          // Crear elemento para la sección censal
           const sectionItem = document.createElement('div');
           sectionItem.className = 'summary-section';
           sectionItem.innerHTML = `
@@ -840,7 +872,6 @@
         zoneItem.appendChild(sectionsContainer);
         summaryContent.appendChild(zoneItem);
 
-        // Añadir evento de clic para expandir/contraer
         zoneHeader.addEventListener('click', function() {
           const isVisible = sectionsContainer.style.display === 'block';
           sectionsContainer.style.display = isVisible ? 'none' : 'block';
@@ -871,7 +902,6 @@
     function toggleRightSidebar() {
       rightSidebar.classList.toggle('visible');
 
-      // Aplicar desenfoque si la barra derecha está visible
       const isRightSidebarVisible = rightSidebar.classList.contains('visible');
       mapContainer.classList.toggle('blur', isRightSidebarVisible);
       header.classList.toggle('blur', isRightSidebarVisible);
@@ -903,11 +933,9 @@
       e = e || window.event;
       if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
         e.preventDefault();
-        // Obtener la posición inicial del cursor
         pos3 = e.clientX;
         pos4 = e.clientY;
         document.onmouseup = closeDragElement;
-        // Llamar a la función cada vez que el cursor se mueve
         document.onmousemove = elementDrag;
       }
     }
@@ -915,24 +943,53 @@
     function elementDrag(e) {
       e = e || window.event;
       e.preventDefault();
-      // Calcular la nueva posición del cursor
       pos1 = pos3 - e.clientX;
       pos2 = pos4 - e.clientY;
       pos3 = e.clientX;
       pos4 = e.clientY;
-      // Establecer la nueva posición del elemento
       legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
       legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
     }
 
     function closeDragElement() {
-      // Detener el movimiento cuando se suelta el botón del ratón
       document.onmouseup = null;
       document.onmousemove = null;
     }
 
-    // Configuración inicial: solo "V. Inicial" activado
-    document.addEventListener('DOMContentLoaded', () => vFinalSwitch.checked = false);
+    // Mostrar notificaciones
+    function showNotification(message, type = 'success') {
+      notification.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+
+    // Configuración inicial
+    document.addEventListener('DOMContentLoaded', () => {
+      vFinalSwitch.checked = false;
+      // Añadir tooltips
+      const elementsWithTitle = document.querySelectorAll('[title]');
+      elementsWithTitle.forEach(elem => {
+        elem.addEventListener('mouseenter', function() {
+          const tooltip = document.createElement('div');
+          tooltip.className = 'tooltip';
+          tooltip.textContent = this.getAttribute('title');
+          document.body.appendChild(tooltip);
+          const rect = this.getBoundingClientRect();
+          tooltip.style.left = rect.left + 'px';
+          tooltip.style.top = rect.top - 30 + 'px';
+          this.tooltip = tooltip;
+        });
+        elem.addEventListener('mouseleave', function() {
+          if (this.tooltip) {
+            document.body.removeChild(this.tooltip);
+            this.tooltip = null;
+          }
+        });
+      });
+    });
   </script>
 
 </body>
