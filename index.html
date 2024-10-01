@@ -30,7 +30,7 @@
       color: white;
       display: flex;
       align-items: center;
-      padding: 0.5rem 0.5rem;
+      padding: 0.3rem 0.5rem;
       font-size: 1rem;
       font-weight: 500;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -76,7 +76,8 @@
 
     .map-container {
       margin-top: 50px;
-      height: calc(100vh - 50px);
+      margin-bottom: 50px; /* Espacio para la barra inferior */
+      height: calc(100vh - 100px); /* Altura ajustada del mapa */
     }
 
     .map {
@@ -341,39 +342,31 @@
       color: #bdc3c7;
     }
 
-    /* Estilos para la leyenda */
+    /* Leyenda en barra inferior */
     .legend-panel {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      width: 250px;
-      background-color: rgba(52, 73, 94, 0.95);
-      color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f0f0f0; /* Fondo gris claro */
+      color: #2c3e50;
       padding: 0.5rem;
       z-index: 1000;
-      resize: both;
-      overflow: auto;
-      min-width: 200px;
-      min-height: 100px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid #bdc3c7;
     }
 
-    .legend-panel h3 {
-      margin-top: 0;
-      font-size: 1rem;
-      text-align: center;
-      margin-bottom: 0.5rem;
-      border-bottom: 1px solid #bdc3c7;
-      padding-bottom: 0.5rem;
-      cursor: move;
-      font-weight: 500;
+    .legend-panel.hidden {
+      display: none;
     }
 
     .legend-content {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+      display: flex;
+      align-items: center;
     }
 
     .legend-item {
@@ -381,34 +374,34 @@
       align-items: center;
       cursor: pointer;
       padding: 0.5rem;
+      margin-right: 1rem;
       border-radius: 5px;
       transition: background-color 0.2s;
-      margin-bottom: 0.5rem;
     }
 
     .legend-item:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.1);
     }
 
     .legend-color-box {
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      margin-right: 0.75rem;
-      border: 2px solid #bdc3c7;
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      margin-right: 0.5rem;
+      border: 1px solid #bdc3c7;
     }
 
     .legend-item-text {
       flex-grow: 1;
-      font-size: 0.95rem;
-      color: white;
+      font-size: 0.9rem;
+      color: #2c3e50;
       font-weight: 500;
     }
 
     /* Mensajes de notificación */
     .notification {
       position: fixed;
-      bottom: 20px;
+      bottom: 70px; /* Ajustado para no tapar la barra inferior */
       right: 20px;
       background-color: #27ae60;
       color: white;
@@ -451,13 +444,6 @@
         max-width: none;
       }
 
-      .legend-panel {
-        width: 90%;
-        left: 5%;
-        top: auto;
-        bottom: 10px;
-      }
-
       .leaflet-top.leaflet-right {
         top: 60px;
         right: 10px;
@@ -472,10 +458,6 @@
 
       .switch-label {
         font-size: 0.8rem;
-      }
-
-      .legend-panel h3 {
-        font-size: 0.9rem;
       }
 
       .legend-item-text {
@@ -558,9 +540,8 @@
     <div id="map" class="map"></div>
   </div>
 
-  <!-- Leyenda movible y redimensionable -->
+  <!-- Leyenda en barra inferior -->
   <div id="legendPanel" class="legend-panel">
-    <h3>Leyenda de Zonas</h3>
     <ul id="legendContent" class="legend-content">
       <!-- Los elementos de la leyenda se generarán dinámicamente -->
     </ul>
@@ -772,7 +753,7 @@
 
           map.fitBounds(zoneBounds);
 
-          // Opcional: resaltar temporalmente la zona
+          // Resaltar temporalmente la zona
           zonePolygons.forEach(polygon => {
             polygon.setStyle({
               weight: 5,
@@ -924,43 +905,11 @@
     // Mostrar/Ocultar la leyenda
     toggleLegendSwitch.addEventListener('change', function() {
       if (toggleLegendSwitch.checked) {
-        legendPanel.style.display = 'block';
+        legendPanel.classList.remove('hidden');
       } else {
-        legendPanel.style.display = 'none';
+        legendPanel.classList.add('hidden');
       }
     });
-
-    // Hacer la leyenda movible
-    legendPanel.addEventListener('mousedown', dragMouseDown);
-
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    function dragMouseDown(e) {
-      e = e || window.event;
-      if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-      }
-    }
-
-    function elementDrag(e) {
-      e = e || window.event;
-      e.preventDefault();
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
-      legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
-    }
-
-    function closeDragElement() {
-      document.onmouseup = null;
-      document.onmousemove = null;
-    }
 
     // Mostrar notificaciones
     function showNotification(message, type = 'success') {
