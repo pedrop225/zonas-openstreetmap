@@ -30,8 +30,8 @@
       color: white;
       display: flex;
       align-items: center;
-      padding: 0.5rem 1rem;
-      font-size: 1.2rem;
+      padding: 0.3rem 0.5rem; /* Reducir padding para disminuir altura */
+      font-size: 1rem; /* Reducir tamaño de fuente */
       font-weight: 500;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       position: fixed;
@@ -50,7 +50,7 @@
       font-size: 1rem;
       background-color: #3498db;
       color: white;
-      padding: 0.5rem 0.75rem;
+      padding: 0.4rem 0.6rem; /* Ajustar padding */
       border: none;
       cursor: pointer;
       border-radius: 5px;
@@ -63,7 +63,7 @@
     }
 
     #toggleRightSidebarBtn {
-      padding-right: 0.75rem;
+      padding-right: 0.6rem;
       z-index: 1001;
       position: relative;
     }
@@ -75,8 +75,9 @@
     }
 
     .map-container {
-      height: calc(100vh - 60px);
-      margin-top: 60px;
+      /* Ajustar margen y altura dinámicamente */
+      margin-top: 50px; /* Reducir margen superior */
+      height: calc(100vh - 50px); /* Ajustar altura del mapa */
     }
 
     .map {
@@ -87,9 +88,9 @@
 
     /* Barra lateral izquierda */
     .sidebar {
-      height: calc(100vh - 60px);
+      height: calc(100vh - 50px); /* Ajustar altura */
       position: fixed;
-      top: 60px;
+      top: 50px; /* Ajustar posición */
       left: 0;
       width: 200px;
       background-color: #34495e;
@@ -234,9 +235,9 @@
 
     /* Barra lateral derecha con resumen y scroll */
     .right-sidebar {
-      height: calc(100vh - 60px);
+      height: calc(100vh - 50px); /* Ajustar altura */
       position: fixed;
-      top: 60px;
+      top: 50px; /* Ajustar posición */
       right: 0;
       width: 80%;
       max-width: 540px;
@@ -407,11 +408,6 @@
       color: white;
     }
 
-    .legend-item.inactive .legend-color-box,
-    .legend-item.inactive .legend-item-text {
-      opacity: 0.5;
-    }
-
     /* Mensajes de notificación */
     .notification {
       position: fixed;
@@ -439,7 +435,7 @@
     /* Media queries para diseño responsive */
     @media (max-width: 768px) {
       header {
-        padding: 0.5rem;
+        padding: 0.3rem 0.5rem;
         font-size: 1rem;
       }
 
@@ -633,7 +629,7 @@
     function handleFileSelection() {
       if (fileInput.files.length) {
         const file = fileInput.files[0];
-        if (file.type !== 'text/csv') {
+        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
           showNotification('Por favor, seleccione un archivo CSV válido.', 'error');
           fileInput.value = '';
           fileName.innerHTML = `<i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo`;
@@ -750,8 +746,6 @@
     function generateLegend(zonesWithColors, usedColors) {
       legendContent.innerHTML = '';
 
-      let zonesVisibility = {};
-
       zonesWithColors.forEach(item => {
         const legendItem = document.createElement('li');
         legendItem.className = 'legend-item';
@@ -769,24 +763,20 @@
         
         legendItem.setAttribute('data-zone', item.zone);
 
-        zonesVisibility[item.zone] = true;
-
+        // Añadir evento de clic para centrar el mapa en la zona
         legendItem.addEventListener('click', function() {
           const zone = this.getAttribute('data-zone');
-          const isVisible = zonesVisibility[zone];
-          zonesVisibility[zone] = !isVisible;
+          const zonePolygons = polygonsByZone[zone];
+          const zoneBounds = L.latLngBounds();
 
-          polygonsByZone[zone].forEach(polygon => {
-            if (zonesVisibility[zone]) {
-              polygon.addTo(polygonLayer);
-              legendItem.classList.remove('inactive');
-            } else {
-              polygonLayer.removeLayer(polygon);
-              legendItem.classList.add('inactive');
-            }
+          zonePolygons.forEach(polygon => {
+            zoneBounds.extend(polygon.getBounds());
           });
+
+          map.fitBounds(zoneBounds);
         });
 
+        // Añadir evento para resaltar zona al pasar el ratón
         legendItem.addEventListener('mouseover', function() {
           const zone = this.getAttribute('data-zone');
           polygonsByZone[zone].forEach(polygon => {
