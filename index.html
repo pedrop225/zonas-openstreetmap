@@ -590,466 +590,467 @@
   <!-- Botón para exportar el mapa -->
   <button id="exportMapBtn" class="export-map-btn">Exportar Mapa</button>
 
-  <!-- Scripts -->
+  <!-- Scripts de las bibliotecas -->
   <script defer src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.4.0/easy-button.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+  <!-- Tu script principal -->
   <script>
-    const vInicialSwitch = document.getElementById('vInicialSwitch');
-    const vFinalSwitch = document.getElementById('vFinalSwitch');
-    const toggleLegendSwitch = document.getElementById('toggleLegendSwitch');
-    const themeSwitch = document.getElementById('themeSwitch');
-    const sidebar = document.getElementById('sidebar');
-    const rightSidebar = document.getElementById('rightSidebar');
-    const fileInput = document.getElementById('fileInput');
-    const fileName = document.getElementById('fileName');
-    const legendPanel = document.getElementById('legendPanel');
-    const legendContent = document.getElementById('legendContent');
-    const summaryContent = document.getElementById('summaryContent');
-    const mapContainer = document.getElementById('mapContainer');
-    const header = document.querySelector("header");
-    const loader = document.getElementById('loader');
-    const exportMapBtn = document.getElementById('exportMapBtn');
-    const searchInput = document.getElementById('searchInput');
-    let csvData = null; // Variable para almacenar los datos CSV en memoria
+    document.addEventListener('DOMContentLoaded', function() {
+      const vInicialSwitch = document.getElementById('vInicialSwitch');
+      const vFinalSwitch = document.getElementById('vFinalSwitch');
+      const toggleLegendSwitch = document.getElementById('toggleLegendSwitch');
+      const themeSwitch = document.getElementById('themeSwitch');
+      const sidebar = document.getElementById('sidebar');
+      const rightSidebar = document.getElementById('rightSidebar');
+      const fileInput = document.getElementById('fileInput');
+      const fileName = document.getElementById('fileName');
+      const legendPanel = document.getElementById('legendPanel');
+      const legendContent = document.getElementById('legendContent');
+      const summaryContent = document.getElementById('summaryContent');
+      const mapContainer = document.getElementById('mapContainer');
+      const header = document.querySelector("header");
+      const loader = document.getElementById('loader');
+      const exportMapBtn = document.getElementById('exportMapBtn');
+      const searchInput = document.getElementById('searchInput');
+      let csvData = null; // Variable para almacenar los datos CSV en memoria
 
-    let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
+      let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
 
-    // Inicializar el mapa
-    let map = L.map('map').setView([28.0665, -16.7332], 13);
+      // Inicializar el mapa
+      let map = L.map('map').setView([28.0665, -16.7332], 13);
 
-    // Capas base
-    const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; OpenStreetMap',
-      maxZoom: 18,
-    });
+      // Capas base
+      const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; OpenStreetMap',
+        maxZoom: 18,
+      });
 
-    const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      attribution: 'Map data &copy; OpenTopoMap',
-      maxZoom: 17,
-    });
+      const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; OpenTopoMap',
+        maxZoom: 17,
+      });
 
-    streetMap.addTo(map);
+      streetMap.addTo(map);
 
-    const baseMaps = {
-      "Callejero": streetMap,
-      "Topográfico": topoMap
-    };
+      const baseMaps = {
+        "Callejero": streetMap,
+        "Topográfico": topoMap
+      };
 
-    // Control de capas
-    L.control.layers(baseMaps).addTo(map);
+      // Control de capas
+      L.control.layers(baseMaps).addTo(map);
 
-    // Botón para restablecer vista inicial
-    L.easyButton('fa-home', function(btn, map){
-      map.setView([28.0665, -16.7332], 13);
-    }).addTo(map);
+      // Botón para restablecer vista inicial
+      L.easyButton('fa-home', function(btn, map){
+        map.setView([28.0665, -16.7332], 13);
+      }).addTo(map);
 
-    let polygonLayer = L.featureGroup().addTo(map);
+      let polygonLayer = L.featureGroup().addTo(map);
 
-    // Manejar cambios de interruptores
-    vInicialSwitch.addEventListener('change', handleSwitchChange);
-    vFinalSwitch.addEventListener('change', handleSwitchChange);
+      // Manejar cambios de interruptores
+      vInicialSwitch.addEventListener('change', handleSwitchChange);
+      vFinalSwitch.addEventListener('change', handleSwitchChange);
 
-    function handleSwitchChange() {
-      if (this === vInicialSwitch && vInicialSwitch.checked) {
-        vFinalSwitch.checked = false;
-      } else if (this === vFinalSwitch && vFinalSwitch.checked) {
-        vInicialSwitch.checked = false;
-      }
+      function handleSwitchChange() {
+        if (this === vInicialSwitch && vInicialSwitch.checked) {
+          vFinalSwitch.checked = false;
+        } else if (this === vFinalSwitch && vFinalSwitch.checked) {
+          vInicialSwitch.checked = false;
+        }
 
-      if (csvData) {
-        clearMap();
-        processCSVData(csvData);
-        generateSummary(csvData);
-      }
-    }
-
-    fileInput.addEventListener('change', handleFileSelection);
-
-    function handleFileSelection() {
-      const file = fileInput.files[0];
-      if (file && file.name.endsWith('.csv')) {
-        fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
-        loadCSV(file);
-      } else {
-        alert('Por favor, seleccione un archivo CSV válido.');
-        fileInput.value = '';
-      }
-    }
-
-    function loadCSV(file) {
-      loader.style.display = 'block';
-      Papa.parse(file, {
-        header: true,
-        complete: function(results) {
-          csvData = results.data;
+        if (csvData) {
           clearMap();
           processCSVData(csvData);
           generateSummary(csvData);
-          loader.style.display = 'none';
-          alert('Archivo CSV cargado exitosamente.');
-        },
-        error: function(error) {
-          loader.style.display = 'none';
-          alert('Error al cargar el archivo CSV: ' + error.message);
         }
-      });
-    }
+      }
 
-    function processCSVData(data) {
-      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-      const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
+      fileInput.addEventListener('change', handleFileSelection);
 
-      const colorsPalette = [
-        '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
-        '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
-        '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
-        '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
-      ];
+      function handleFileSelection() {
+        const file = fileInput.files[0];
+        if (file && file.name.endsWith('.csv')) {
+          fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
+          loadCSV(file);
+        } else {
+          alert('Por favor, seleccione un archivo CSV válido.');
+          fileInput.value = '';
+        }
+      }
 
-      let usedColors = {};
-      let colorIndex = 0;
-
-      let zonesWithColors = [];
-      polygonsByZone = {};
-
-      data.forEach(function(row) {
-        try {
-          const polygonData = JSON.parse(row['Poligon']);
-          const sectionCensal = row['ZE. Sección Censal'];
-          const zone = row[zoneColumn];
-          const poliza = row[polizaColumn];
-          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
-
-          const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
-
-          if (!usedColors[zone]) {
-            usedColors[zone] = colorsPalette[colorIndex];
-            colorIndex = (colorIndex + 1) % colorsPalette.length;
-            zonesWithColors.push({ zone, color: usedColors[zone] });
+      function loadCSV(file) {
+        loader.style.display = 'block';
+        Papa.parse(file, {
+          header: true,
+          complete: function(results) {
+            csvData = results.data;
+            clearMap();
+            processCSVData(csvData);
+            generateSummary(csvData);
+            loader.style.display = 'none';
+            alert('Archivo CSV cargado exitosamente.');
+          },
+          error: function(error) {
+            loader.style.display = 'none';
+            alert('Error al cargar el archivo CSV: ' + error.message);
           }
+        });
+      }
 
-          const leafletPolygon = L.polygon(coordinates, {
-            color: usedColors[zone],
-            fillColor: usedColors[zone],
-            fillOpacity: 0.4,
-            weight: 2
-          }).addTo(polygonLayer);
+      function processCSVData(data) {
+        const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+        const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
-          if (!polygonsByZone[zone]) {
-            polygonsByZone[zone] = [];
-          }
-          polygonsByZone[zone].push(leafletPolygon);
+        const colorsPalette = [
+          '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
+          '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
+          '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
+          '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
+        ];
 
-          leafletPolygon.on('mouseover', function () {
-            this.setStyle({
-              weight: 5,
-              color: '#666',
-              fillOpacity: 0.6,
-              fillColor: usedColors[zone]
-            });
-          });
+        let usedColors = {};
+        let colorIndex = 0;
 
-          leafletPolygon.on('mouseout', function () {
-            this.setStyle({
-              weight: 2,
+        let zonesWithColors = [];
+        polygonsByZone = {};
+
+        data.forEach(function(row) {
+          try {
+            const polygonData = JSON.parse(row['Poligon']);
+            const sectionCensal = row['ZE. Sección Censal'];
+            const zone = row[zoneColumn];
+            const poliza = row[polizaColumn];
+            const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
+
+            const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
+
+            if (!usedColors[zone]) {
+              usedColors[zone] = colorsPalette[colorIndex];
+              colorIndex = (colorIndex + 1) % colorsPalette.length;
+              zonesWithColors.push({ zone, color: usedColors[zone] });
+            }
+
+            const leafletPolygon = L.polygon(coordinates, {
               color: usedColors[zone],
-              fillOpacity: 0.4
+              fillColor: usedColors[zone],
+              fillOpacity: 0.4,
+              weight: 2
+            }).addTo(polygonLayer);
+
+            if (!polygonsByZone[zone]) {
+              polygonsByZone[zone] = [];
+            }
+            polygonsByZone[zone].push(leafletPolygon);
+
+            leafletPolygon.on('mouseover', function () {
+              this.setStyle({
+                weight: 5,
+                color: '#666',
+                fillOpacity: 0.6,
+                fillColor: usedColors[zone]
+              });
+            });
+
+            leafletPolygon.on('mouseout', function () {
+              this.setStyle({
+                weight: 2,
+                color: usedColors[zone],
+                fillOpacity: 0.4
+              });
+            });
+
+            leafletPolygon.bindPopup(`
+              <b>Sección Censal:</b> ${sectionCensal}<br>
+              <b>Zona de Explotación:</b> ${zone}<br>
+              <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
+              <b>Pólizas:</b> ${poliza}
+            `);
+          } catch (error) {
+            console.error("Error al procesar el polígono:", error);
+          }
+        });
+
+        zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone));
+
+        legendContent.innerHTML = '';
+
+        let zonesVisibility = {};
+
+        zonesWithColors.forEach(item => {
+          const legendItem = document.createElement('li');
+          legendItem.className = 'legend-item';
+          
+          const colorBox = document.createElement('span');
+          colorBox.className = 'legend-color-box';
+          colorBox.style.backgroundColor = item.color;
+          
+          const itemText = document.createElement('span');
+          itemText.className = 'legend-item-text';
+          itemText.textContent = item.zone;
+          
+          legendItem.appendChild(colorBox);
+          legendItem.appendChild(itemText);
+          
+          legendItem.setAttribute('data-zone', item.zone);
+
+          zonesVisibility[item.zone] = true;
+
+          legendItem.addEventListener('click', function() {
+            const zone = this.getAttribute('data-zone');
+            const isVisible = zonesVisibility[zone];
+            zonesVisibility[zone] = !isVisible;
+
+            polygonsByZone[zone].forEach(polygon => {
+              if (zonesVisibility[zone]) {
+                polygon.addTo(polygonLayer);
+                legendItem.classList.remove('inactive');
+              } else {
+                polygonLayer.removeLayer(polygon);
+                legendItem.classList.add('inactive');
+              }
             });
           });
 
-          leafletPolygon.bindPopup(`
-            <b>Sección Censal:</b> ${sectionCensal}<br>
-            <b>Zona de Explotación:</b> ${zone}<br>
-            <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
-            <b>Pólizas:</b> ${poliza}
-          `);
-        } catch (error) {
-          console.error("Error al procesar el polígono:", error);
+          legendItem.addEventListener('mouseover', function() {
+            const zone = this.getAttribute('data-zone');
+            polygonsByZone[zone].forEach(polygon => {
+              polygon.setStyle({
+                weight: 5,
+                color: '#fff',
+                fillOpacity: 0.7,
+              });
+            });
+          });
+
+          legendItem.addEventListener('mouseout', function() {
+            const zone = this.getAttribute('data-zone');
+            polygonsByZone[zone].forEach(polygon => {
+              polygon.setStyle({
+                weight: 2,
+                color: usedColors[zone],
+                fillOpacity: 0.4,
+              });
+            });
+          });
+
+          legendContent.appendChild(legendItem);
+        });
+
+        if (polygonLayer.getLayers().length > 0) {
+          map.fitBounds(polygonLayer.getBounds());
         }
+      }
+
+      // Añadir funcionalidad de búsqueda
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.legend-item').forEach(item => {
+          const zoneName = item.getAttribute('data-zone').toLowerCase();
+          if (zoneName.includes(searchTerm)) {
+            item.style.display = 'flex';
+          } else {
+            item.style.display = 'none';
+          }
+        });
       });
 
-      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone));
+      // Limpiar los polígonos del mapa
+      function clearMap() {
+        polygonLayer.clearLayers();
+      }
 
-      legendContent.innerHTML = '';
+      // Generar el resumen dinámico en la barra derecha
+      function generateSummary(data) {
+        const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+        const summary = {};
 
-      let zonesVisibility = {};
+        data.forEach(function(row) {
+          const zone = row[zoneColumn];
+          const sectionCensal = row['ZE. Sección Censal'];
+          const polizaSeccionCensal = parseInt(row['Pol. ZE. Sección Censal'] || 0);
+          const polizaZona = parseInt(vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] || 0 : row['Pol. Nueva Zona'] || 0);
 
-      zonesWithColors.forEach(item => {
-        const legendItem = document.createElement('li');
-        legendItem.className = 'legend-item';
-        
-        const colorBox = document.createElement('span');
-        colorBox.className = 'legend-color-box';
-        colorBox.style.backgroundColor = item.color;
-        
-        const itemText = document.createElement('span');
-        itemText.className = 'legend-item-text';
-        itemText.textContent = item.zone;
-        
-        legendItem.appendChild(colorBox);
-        legendItem.appendChild(itemText);
-        
-        legendItem.setAttribute('data-zone', item.zone);
+          if (!summary[zone]) {
+            summary[zone] = {
+              totalPolizasZona: polizaZona,
+              secciones: {}
+            };
+          }
 
-        zonesVisibility[item.zone] = true;
+          if (!summary[zone].secciones[sectionCensal]) {
+            summary[zone].secciones[sectionCensal] = {
+              totalPolizasSeccion: polizaSeccionCensal
+            };
+          }
+        });
 
-        legendItem.addEventListener('click', function() {
-          const zone = this.getAttribute('data-zone');
-          const isVisible = zonesVisibility[zone];
-          zonesVisibility[zone] = !isVisible;
+        // Generar datos para el gráfico
+        generateChartData(summary);
 
-          polygonsByZone[zone].forEach(polygon => {
-            if (zonesVisibility[zone]) {
-              polygon.addTo(polygonLayer);
-              legendItem.classList.remove('inactive');
+        summaryContent.innerHTML = '';
+
+        for (const zone in summary) {
+          const zoneItem = document.createElement('div');
+          zoneItem.className = 'summary-zone';
+
+          const zoneHeader = document.createElement('div');
+          zoneHeader.className = 'summary-header';
+          zoneHeader.innerHTML = `
+            <span class="toggle-button"><i class="fas fa-chevron-right"></i></span>
+            <span class="zone-name">${zone}</span>
+            <span class="zone-total">Total Pólizas: ${summary[zone].totalPolizasZona}</span>
+          `;
+          zoneItem.appendChild(zoneHeader);
+
+          const sectionsContainer = document.createElement('div');
+          sectionsContainer.className = 'sections-container';
+
+          for (const section in summary[zone].secciones) {
+            const sectionItem = document.createElement('div');
+            sectionItem.className = 'summary-section';
+            sectionItem.innerHTML = `
+              <span class="section-name">${section}</span>
+              <span class="section-total">${summary[zone].secciones[section].totalPolizasSeccion}</span>
+            `;
+            sectionsContainer.appendChild(sectionItem);
+          }
+
+          zoneItem.appendChild(sectionsContainer);
+          summaryContent.appendChild(zoneItem);
+
+          zoneHeader.addEventListener('click', function() {
+            const isVisible = sectionsContainer.style.display === 'block';
+            sectionsContainer.style.display = isVisible ? 'none' : 'block';
+
+            const icon = this.querySelector('.toggle-button i');
+            if (isVisible) {
+              icon.classList.remove('fa-chevron-down');
+              icon.classList.add('fa-chevron-right');
             } else {
-              polygonLayer.removeLayer(polygon);
-              legendItem.classList.add('inactive');
+              icon.classList.remove('fa-chevron-right');
+              icon.classList.add('fa-chevron-down');
             }
           });
-        });
-
-        legendItem.addEventListener('mouseover', function() {
-          const zone = this.getAttribute('data-zone');
-          polygonsByZone[zone].forEach(polygon => {
-            polygon.setStyle({
-              weight: 5,
-              color: '#fff',
-              fillOpacity: 0.7,
-            });
-          });
-        });
-
-        legendItem.addEventListener('mouseout', function() {
-          const zone = this.getAttribute('data-zone');
-          polygonsByZone[zone].forEach(polygon => {
-            polygon.setStyle({
-              weight: 2,
-              color: usedColors[zone],
-              fillOpacity: 0.4,
-            });
-          });
-        });
-
-        legendContent.appendChild(legendItem);
-      });
-
-      if (polygonLayer.getLayers().length > 0) {
-        map.fitBounds(polygonLayer.getBounds());
+        }
       }
-    }
 
-    // Añadir funcionalidad de búsqueda
-    searchInput.addEventListener('input', function() {
-      const searchTerm = this.value.toLowerCase();
-      document.querySelectorAll('.legend-item').forEach(item => {
-        const zoneName = item.getAttribute('data-zone').toLowerCase();
-        if (zoneName.includes(searchTerm)) {
-          item.style.display = 'flex';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
+      // Generar gráfico de barras
+      function generateChartData(summary) {
+        const labels = Object.keys(summary);
+        const data = labels.map(zone => summary[zone].totalPolizasZona);
 
-    // Limpiar los polígonos del mapa
-    function clearMap() {
-      polygonLayer.clearLayers();
-    }
-
-    // Generar el resumen dinámico en la barra derecha
-    function generateSummary(data) {
-      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-      const summary = {};
-
-      data.forEach(function(row) {
-        const zone = row[zoneColumn];
-        const sectionCensal = row['ZE. Sección Censal'];
-        const polizaSeccionCensal = parseInt(row['Pol. ZE. Sección Censal'] || 0);
-        const polizaZona = parseInt(vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] || 0 : row['Pol. Nueva Zona'] || 0);
-
-        if (!summary[zone]) {
-          summary[zone] = {
-            totalPolizasZona: polizaZona,
-            secciones: {}
-          };
-        }
-
-        if (!summary[zone].secciones[sectionCensal]) {
-          summary[zone].secciones[sectionCensal] = {
-            totalPolizasSeccion: polizaSeccionCensal
-          };
-        }
-      });
-
-      // Generar datos para el gráfico
-      generateChartData(summary);
-
-      summaryContent.innerHTML = '';
-
-      for (const zone in summary) {
-        const zoneItem = document.createElement('div');
-        zoneItem.className = 'summary-zone';
-
-        const zoneHeader = document.createElement('div');
-        zoneHeader.className = 'summary-header';
-        zoneHeader.innerHTML = `
-          <span class="toggle-button"><i class="fas fa-chevron-right"></i></span>
-          <span class="zone-name">${zone}</span>
-          <span class="zone-total">Total Pólizas: ${summary[zone].totalPolizasZona}</span>
-        `;
-        zoneItem.appendChild(zoneHeader);
-
-        const sectionsContainer = document.createElement('div');
-        sectionsContainer.className = 'sections-container';
-
-        for (const section in summary[zone].secciones) {
-          const sectionItem = document.createElement('div');
-          sectionItem.className = 'summary-section';
-          sectionItem.innerHTML = `
-            <span class="section-name">${section}</span>
-            <span class="section-total">${summary[zone].secciones[section].totalPolizasSeccion}</span>
-          `;
-          sectionsContainer.appendChild(sectionItem);
-        }
-
-        zoneItem.appendChild(sectionsContainer);
-        summaryContent.appendChild(zoneItem);
-
-        zoneHeader.addEventListener('click', function() {
-          const isVisible = sectionsContainer.style.display === 'block';
-          sectionsContainer.style.display = isVisible ? 'none' : 'block';
-
-          const icon = this.querySelector('.toggle-button i');
-          if (isVisible) {
-            icon.classList.remove('fa-chevron-down');
-            icon.classList.add('fa-chevron-right');
-          } else {
-            icon.classList.remove('fa-chevron-right');
-            icon.classList.add('fa-chevron-down');
+        const ctx = document.getElementById('zoneChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Pólizas por Zona',
+              data: data,
+              backgroundColor: labels.map(zone => {
+                return polygonsByZone[zone][0].options.fillColor;
+              })
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
           }
         });
       }
-    }
 
-    // Generar gráfico de barras
-    function generateChartData(summary) {
-      const labels = Object.keys(summary);
-      const data = labels.map(zone => summary[zone].totalPolizasZona);
+      function toggleSidebar() {
+        sidebar.classList.toggle('visible');
 
-      const ctx = document.getElementById('zoneChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Pólizas por Zona',
-            data: data,
-            backgroundColor: labels.map(zone => {
-              return polygonsByZone[zone][0].options.fillColor;
-            })
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false
+        const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
+        if (sidebar.classList.contains('visible')) {
+          leafletControls.style.left = '230px';
+        } else {
+          leafletControls.style.left = '50px';
+        }
+      }
+
+      function toggleRightSidebar() {
+        rightSidebar.classList.toggle('visible');
+
+        const isRightSidebarVisible = rightSidebar.classList.contains('visible');
+        mapContainer.classList.toggle('blur', isRightSidebarVisible);
+        header.classList.toggle('blur', isRightSidebarVisible);
+        sidebar.classList.toggle('blur', isRightSidebarVisible);
+
+        const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
+        if (rightSidebar.classList.contains('visible')) {
+          leafletControls.style.right = '590px';
+        } else {
+          leafletControls.style.right = '70px';
+        }
+      }
+
+      // Mostrar/Ocultar la leyenda
+      toggleLegendSwitch.addEventListener('change', function() {
+        if (toggleLegendSwitch.checked) {
+          legendPanel.style.display = 'block';
+        } else {
+          legendPanel.style.display = 'none';
         }
       });
-    }
 
-    function toggleSidebar() {
-      sidebar.classList.toggle('visible');
+      // Mover la leyenda
+      legendPanel.addEventListener('mousedown', dragMouseDown);
 
-      const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
-      if (sidebar.classList.contains('visible')) {
-        leafletControls.style.left = '230px';
-      } else {
-        leafletControls.style.left = '50px';
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+      function dragMouseDown(e) {
+        e = e || window.event;
+        if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
+          e.preventDefault();
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          document.onmouseup = closeDragElement;
+          document.onmousemove = elementDrag;
+        }
       }
-    }
 
-    function toggleRightSidebar() {
-      rightSidebar.classList.toggle('visible');
-
-      const isRightSidebarVisible = rightSidebar.classList.contains('visible');
-      mapContainer.classList.toggle('blur', isRightSidebarVisible);
-      header.classList.toggle('blur', isRightSidebarVisible);
-      sidebar.classList.toggle('blur', isRightSidebarVisible);
-
-      const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
-      if (rightSidebar.classList.contains('visible')) {
-        leafletControls.style.right = '590px';
-      } else {
-        leafletControls.style.right = '70px';
-      }
-    }
-
-    // Mostrar/Ocultar la leyenda
-    toggleLegendSwitch.addEventListener('change', function() {
-      if (toggleLegendSwitch.checked) {
-        legendPanel.style.display = 'block';
-      } else {
-        legendPanel.style.display = 'none';
-      }
-    });
-
-    // Mover la leyenda
-    legendPanel.addEventListener('mousedown', dragMouseDown);
-
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    function dragMouseDown(e) {
-      e = e || window.event;
-      if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
+      function elementDrag(e) {
+        e = e || window.event;
         e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
+        legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
+        legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
       }
-    }
 
-    function elementDrag(e) {
-      e = e || window.event;
-      e.preventDefault();
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
-      legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
-    }
-
-    function closeDragElement() {
-      document.onmouseup = null;
-      document.onmousemove = null;
-    }
-
-    // Modo oscuro
-    themeSwitch.addEventListener('change', function() {
-      if (themeSwitch.checked) {
-        document.body.classList.add('dark-mode');
-        header.classList.add('dark-mode');
-        sidebar.classList.add('dark-mode');
-        rightSidebar.classList.add('dark-mode');
-        legendPanel.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.body.classList.remove('dark-mode');
-        header.classList.remove('dark-mode');
-        sidebar.classList.remove('dark-mode');
-        rightSidebar.classList.remove('dark-mode');
-        legendPanel.classList.remove('dark-mode');
-        localStorage.setItem('theme', 'light');
+      function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
       }
-    });
 
-    // Cargar tema guardado
-    document.addEventListener('DOMContentLoaded', () => {
+      // Modo oscuro
+      themeSwitch.addEventListener('change', function() {
+        if (themeSwitch.checked) {
+          document.body.classList.add('dark-mode');
+          header.classList.add('dark-mode');
+          sidebar.classList.add('dark-mode');
+          rightSidebar.classList.add('dark-mode');
+          legendPanel.classList.add('dark-mode');
+          localStorage.setItem('theme', 'dark');
+        } else {
+          document.body.classList.remove('dark-mode');
+          header.classList.remove('dark-mode');
+          sidebar.classList.remove('dark-mode');
+          rightSidebar.classList.remove('dark-mode');
+          legendPanel.classList.remove('dark-mode');
+          localStorage.setItem('theme', 'light');
+        }
+      });
+
+      // Cargar tema guardado
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
@@ -1060,15 +1061,15 @@
         themeSwitch.checked = true;
       }
       vFinalSwitch.checked = false;
-    });
 
-    // Exportar mapa
-    exportMapBtn.addEventListener('click', function() {
-      html2canvas(document.getElementById('map')).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'mapa.png';
-        link.href = canvas.toDataURL();
-        link.click();
+      // Exportar mapa
+      exportMapBtn.addEventListener('click', function() {
+        html2canvas(document.getElementById('map')).then(canvas => {
+          const link = document.createElement('a');
+          link.download = 'mapa.png';
+          link.href = canvas.toDataURL();
+          link.click();
+        });
       });
     });
   </script>
