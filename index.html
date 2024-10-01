@@ -346,9 +346,8 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      width: 80%;
-      max-width: 220px;
-      background-color: rgba(52, 73, 94, 0.9);
+      width: 250px;
+      background-color: rgba(52, 73, 94, 0.95);
       color: white;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -356,7 +355,7 @@
       z-index: 1000;
       resize: both;
       overflow: auto;
-      min-width: 150px;
+      min-width: 200px;
       min-height: 100px;
     }
 
@@ -372,14 +371,9 @@
     }
 
     .legend-content {
-      display: flex; /* Cambiar a flex */
-      flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
-      gap: 0.5rem; /* Espacio entre elementos */
       list-style: none;
       padding: 0;
       margin: 0;
-      max-height: 200px;
-      overflow-y: auto;
     }
 
     .legend-item {
@@ -389,8 +383,7 @@
       padding: 0.5rem;
       border-radius: 5px;
       transition: background-color 0.2s;
-      flex: 1 1 calc(50% - 1rem); /* Ajustar ancho para que quepan dos por fila */
-      box-sizing: border-box;
+      margin-bottom: 0.5rem;
     }
 
     .legend-item:hover {
@@ -398,17 +391,18 @@
     }
 
     .legend-color-box {
-      width: 20px;
-      height: 20px;
-      border-radius: 3px;
-      margin-right: 0.5rem;
-      border: 1px solid #bdc3c7;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      margin-right: 0.75rem;
+      border: 2px solid #bdc3c7;
     }
 
     .legend-item-text {
       flex-grow: 1;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: white;
+      font-weight: 500;
     }
 
     /* Mensajes de notificación */
@@ -467,10 +461,6 @@
       .leaflet-top.leaflet-right {
         top: 60px;
         right: 10px;
-      }
-
-      .legend-item {
-        flex: 1 1 calc(100% - 1rem); /* En pantallas pequeñas, una por fila */
       }
     }
 
@@ -781,6 +771,22 @@
           });
 
           map.fitBounds(zoneBounds);
+
+          // Opcional: resaltar temporalmente la zona
+          zonePolygons.forEach(polygon => {
+            polygon.setStyle({
+              weight: 5,
+              color: '#ecf0f1',
+              fillOpacity: 0.7,
+            });
+            setTimeout(() => {
+              polygon.setStyle({
+                weight: 2,
+                color: usedColors[zone],
+                fillOpacity: 0.5,
+              });
+            }, 1000);
+          });
         });
 
         // Añadir evento para resaltar zona al pasar el ratón
