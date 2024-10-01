@@ -19,1064 +19,514 @@
 
   <!-- Estilos propios -->
   <style>
-    /* Estilos generales */
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f9fafb;
-      color: #111827;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Modo oscuro */
-    body.dark-mode {
-      background-color: #1f2937;
-      color: #f9fafb;
-    }
-
-    /* Estilos del encabezado */
-    header {
-      background-color: #1f2937;
-      color: white;
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      font-size: 1.2rem;
-      font-weight: 600;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      z-index: 1000;
-    }
-
-    header.dark-mode {
-      background-color: #111827;
-    }
-
-    #header-left {
-      display: flex;
-      align-items: center;
-    }
-
-    #toggleSidebarBtn, #toggleRightSidebarBtn {
-      font-size: 1rem;
-      background-color: #3b82f6;
-      color: white;
-      padding: 0.5rem 0.75rem;
-      border: none;
-      cursor: pointer;
-      border-radius: 0.375rem;
-      transition: background-color 0.3s ease;
-      margin-right: 0.625rem;
-    }
-
-    #toggleSidebarBtn:hover, #toggleRightSidebarBtn:hover {
-      background-color: #2563eb;
-    }
-
-    /* Efecto de desenfoque cuando la barra lateral derecha está abierta */
-    .blur {
-      filter: blur(5px);
-      transition: filter 0.3s ease;
-    }
-
-    .map-container {
-      height: calc(100vh - 80px);
-      margin-top: 80px;
-    }
-
-    .map {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-    }
-
-    /* Barra lateral izquierda */
-    .sidebar {
-      height: calc(100vh - 80px);
-      position: fixed;
-      top: 80px;
-      left: 0;
-      width: 180px;
-      background-color: #1f2937;
-      color: white;
-      padding: 0.9375rem;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      z-index: 999;
-      display: none;
-      overflow-y: auto;
-    }
-
-    .sidebar.visible {
-      display: block;
-    }
-
-    .sidebar h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.9375rem;
-      text-align: left;
-      font-weight: bold;
-    }
-
-    .sidebar p {
-      font-size: 0.875rem;
-    }
-
-    /* Botones de zoom ajustados para que nunca colapsen con la barra lateral */
-    .leaflet-top.leaflet-left {
-      left: 50px;
-      transition: left 0.3s ease;
-    }
-
-    .sidebar.visible ~ .leaflet-top.leaflet-left {
-      left: 230px;
-    }
-
-    /* Botones y elementos de la barra lateral izquierda */
-    .file-upload-container {
-      position: relative;
-      width: 100%;
-      text-align: left;
-      margin-bottom: 1rem;
-    }
-
-    .file-upload-input {
-      display: none;
-    }
-
-    .file-upload-button {
-      background-color: #10b981;
-      color: white;
-      padding: 0.5rem 0.875rem;
-      border: none;
-      border-radius: 1.125rem;
-      font-size: 0.75rem;
-      cursor: pointer;
-      font-weight: 500;
-      text-transform: uppercase;
-      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-      width: 100%;
-    }
-
-    .file-upload-button:hover {
-      background-color: #059669;
-      box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
-    }
-
-    .file-name {
-      margin-top: 0.625rem;
-      font-size: 0.75rem;
-      color: #d1d5db;
-      font-weight: 400;
-      font-style: italic;
-    }
-
-    /* Opciones para los interruptores */
-    .switch-container {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.9375rem;
-      color: white;
-    }
-
-    .switch-label {
-      font-size: 0.875rem;
-      font-weight: bold;
-      margin-left: 0.625rem;
-    }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 2.125rem;
-      height: 1.25rem;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #6b7280;
-      transition: .4s;
-      border-radius: 1.25rem;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 0.875rem;
-      width: 0.875rem;
-      left: 0.1875rem;
-      bottom: 0.1875rem;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .slider {
-      background-color: #3b82f6;
-    }
-
-    input:checked + .slider:before {
-      transform: translateX(0.875rem);
-    }
-
-    /* Barra lateral derecha con resumen y scroll */
-    .right-sidebar {
-      height: calc(100vh - 80px);
-      position: fixed;
-      top: 80px;
-      right: 0;
-      width: 100%;
-      max-width: 540px;
-      background-color: #1f2937;
-      color: white;
-      padding: 0;
-      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-      z-index: 1100;
-      transition: transform 0.3s ease;
-      transform: translateX(100%);
-      overflow-y: auto;
-    }
-
-    .right-sidebar.visible {
-      transform: translateX(0);
-    }
-
-    .right-sidebar h2 {
-      font-size: 1.125rem;
-      font-weight: bold;
-      color: white;
-      margin: 0;
-      padding: 0.9375rem;
-      border-bottom: 1px solid #374151;
-      position: sticky;
-      top: 0;
-      background-color: #1f2937;
-      z-index: 1;
-    }
-
-    .summary-content {
-      padding: 0 0.9375rem;
-    }
-
-    /* Estilos para el resumen jerárquico */
-    .summary-zone {
-      border-bottom: 1px solid #374151;
-      padding: 0.625rem 0;
-    }
-
-    .summary-header {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-      color: white;
-    }
-
-    .toggle-button {
-      width: 1.25rem;
-      text-align: center;
-      margin-right: 0.625rem;
-      transition: transform 0.3s ease;
-    }
-
-    .toggle-button.expanded {
-      transform: rotate(90deg);
-    }
-
-    .zone-name {
-      flex-grow: 1;
-    }
-
-    .zone-total {
-      margin-left: auto;
-      font-weight: normal;
-      color: #9ca3af;
-    }
-
-    .sections-container {
-      margin-left: 1.875rem;
-      padding-top: 0.625rem;
-      display: none;
-    }
-
-    .summary-section {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.3125rem;
-      font-size: 0.875rem;
-      cursor: pointer;
-      color: white;
-    }
-
-    .summary-section:hover {
-      background-color: #374151;
-    }
-
-    .section-name {
-      flex-grow: 1;
-    }
-
-    .section-total {
-      font-weight: normal;
-      color: #9ca3af;
-    }
-
-    .summary-header:hover {
-      background-color: #374151;
-    }
-
-    /* Estilos para la leyenda */
-    .legend-panel {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 220px;
-      background-color: rgba(31, 41, 55, 0.9);
-      color: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-      padding: 0.625rem;
-      z-index: 1000;
-      resize: both;
-      overflow: auto;
-      min-width: 150px;
-      min-height: 100px;
-    }
-
-    .legend-panel h3 {
-      margin-top: 0;
-      font-size: 1rem;
-      text-align: center;
-      margin-bottom: 0.625rem;
-      border-bottom: 1px solid #374151;
-      padding-bottom: 0.3125rem;
-      cursor: move;
-    }
-
-    .legend-panel input[type="text"] {
-      width: 100%;
-      padding: 0.375rem;
-      margin-bottom: 0.625rem;
-      border: none;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      box-sizing: border-box;
-    }
-
-    .legend-content {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-      padding: 0.3125rem;
-      border-radius: 0.3125rem;
-      transition: background-color 0.2s;
-    }
-
-    .legend-item:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .legend-color-box {
-      width: 1.25rem;
-      height: 1.25rem;
-      border-radius: 0.1875rem;
-      margin-right: 0.625rem;
-      border: 1px solid #9ca3af;
-    }
-
-    .legend-item-text {
-      flex-grow: 1;
-      font-size: 0.875rem;
-      color: white;
-    }
-
-    .legend-item.inactive .legend-color-box,
-    .legend-item.inactive .legend-item-text {
-      opacity: 0.5;
-    }
-
-    /* Ajustar posición de los controles de Leaflet */
-    .leaflet-top.leaflet-right {
-      top: 70px;
-      right: 70px;
-    }
-
-    /* Loader */
-    .loader {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 0.625rem solid #f3f3f3;
-      border-top: 0.625rem solid #3498db;
-      border-radius: 50%;
-      width: 5rem;
-      height: 5rem;
-      animation: spin 2s linear infinite;
-      z-index: 1200;
-    }
-
-    @keyframes spin {
-      0% { transform: translate(-50%, -50%) rotate(0deg); }
-      100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    /* Botón para exportar el mapa */
-    .export-map-btn {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      background-color: #3b82f6;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      font-size: 0.875rem;
-      z-index: 1000;
-      transition: background-color 0.3s ease;
-    }
-
-    .export-map-btn:hover {
-      background-color: #2563eb;
-    }
-
-    /* Modo oscuro para elementos */
-    .sidebar.dark-mode, .right-sidebar.dark-mode, .legend-panel.dark-mode {
-      background-color: #111827;
-    }
-
-    .sidebar.dark-mode h2, .right-sidebar.dark-mode h2, .switch-label, .file-name {
-      color: #f9fafb;
-    }
-
-    .slider {
-      background-color: #6b7280;
-    }
-
-    input:checked + .slider {
-      background-color: #3b82f6;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        height: auto;
-        top: 80px;
-        left: 0;
-        padding: 1rem;
-      }
-
-      .sidebar.visible ~ .leaflet-top.leaflet-left {
-        left: 50px;
-      }
-
-      .right-sidebar {
-        width: 100%;
-        max-width: none;
-      }
-
-      .leaflet-top.leaflet-right {
-        right: 50px;
-      }
-    }
+    /* Mantén todo tu CSS existente aquí */
+    /* ... */
   </style>
 </head>
 <body>
 
-  <header>
-    <div id="header-left">
-      <button id="toggleSidebarBtn" aria-label="Mostrar opciones" role="button">☰</button>
-      <button id="toggleRightSidebarBtn" aria-label="Mostrar resumen" role="button">Resumen</button>
-      <span>Visualización de Zonas de Explotación</span>
-    </div>
-  </header>
-
-  <!-- Barra lateral izquierda -->
-  <div class="sidebar" id="sidebar">
-    <h2>Opciones</h2>
-    
-    <div class="file-upload-container">
-      <label class="file-upload-button" for="fileInput">Subir Archivo CSV</label>
-      <input type="file" class="file-upload-input" id="fileInput" accept=".csv" />
-      <p class="file-name" id="fileName"><i class="fas fa-file-csv"></i> No se ha seleccionado ningún archivo</p>
-    </div>
-
-    <!-- Switch V. Inicial -->
-    <div class="switch-container">
-      <label class="switch">
-        <input type="checkbox" id="vInicialSwitch" checked>
-        <span class="slider"></span>
-      </label>
-      <span class="switch-label">V. Inicial</span>
-    </div>
-
-    <!-- Switch V. Final -->
-    <div class="switch-container">
-      <label class="switch">
-        <input type="checkbox" id="vFinalSwitch">
-        <span class="slider"></span>
-      </label>
-      <span class="switch-label">V. Final</span>
-    </div>
-
-    <!-- Interruptor de modo oscuro -->
-    <div class="switch-container">
-      <label class="switch">
-        <input type="checkbox" id="themeSwitch">
-        <span class="slider"></span>
-      </label>
-      <span class="switch-label">Modo Oscuro</span>
-    </div>
-
-    <!-- Switch Mostrar Leyenda -->
-    <div class="switch-container">
-      <label class="switch">
-        <input type="checkbox" id="toggleLegendSwitch" checked>
-        <span class="slider"></span>
-      </label>
-      <span class="switch-label">Mostrar Leyenda</span>
-    </div>
-
-  </div>
-
-  <!-- Barra lateral derecha -->
-  <div class="right-sidebar" id="rightSidebar">
-    <h2>Resumen de Zonas</h2>
-    <div id="summaryContent" class="summary-content">
-      <!-- Resumen dinámico se cargará aquí -->
-    </div>
-    <!-- Gráfico -->
-    <canvas id="zoneChart" width="400" height="200"></canvas>
-  </div>
-
-  <div id="mapContainer" class="map-container">
-    <div id="map" class="map"></div>
-  </div>
-
-  <!-- Leyenda movible y redimensionable -->
-  <div id="legendPanel" class="legend-panel">
-    <h3>Leyenda de Zonas</h3>
-    <input type="text" id="searchInput" placeholder="Buscar zona..." />
-    <ul id="legendContent" class="legend-content">
-      <!-- Los elementos de la leyenda se generarán dinámicamente -->
-    </ul>
-  </div>
-
-  <!-- Loader -->
-  <div id="loader" class="loader" style="display: none;"></div>
-
-  <!-- Botón para exportar el mapa -->
-  <button id="exportMapBtn" class="export-map-btn">Exportar Mapa</button>
+  <!-- Mantén todo tu HTML existente aquí -->
+  <!-- ... -->
 
   <!-- Scripts de las bibliotecas -->
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script defer src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  
+  <!-- Cargar leaflet-easybutton SIN el atributo 'defer' -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-easybutton/2.4.0/easy-button.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- Tu script principal -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const vInicialSwitch = document.getElementById('vInicialSwitch');
-      const vFinalSwitch = document.getElementById('vFinalSwitch');
-      const toggleLegendSwitch = document.getElementById('toggleLegendSwitch');
-      const themeSwitch = document.getElementById('themeSwitch');
-      const sidebar = document.getElementById('sidebar');
-      const rightSidebar = document.getElementById('rightSidebar');
-      const fileInput = document.getElementById('fileInput');
-      const fileName = document.getElementById('fileName');
-      const legendPanel = document.getElementById('legendPanel');
-      const legendContent = document.getElementById('legendContent');
-      const summaryContent = document.getElementById('summaryContent');
-      const mapContainer = document.getElementById('mapContainer');
-      const header = document.querySelector("header");
-      const loader = document.getElementById('loader');
-      const exportMapBtn = document.getElementById('exportMapBtn');
-      const searchInput = document.getElementById('searchInput');
-      const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-      const toggleRightSidebarBtn = document.getElementById('toggleRightSidebarBtn');
-      let csvData = null; // Variable para almacenar los datos CSV en memoria
+  <script defer>
+    // Tu código JavaScript aquí
+    // No es necesario usar 'DOMContentLoaded' ya que 'defer' lo hace innecesario
+    // Asegúrate de que todo tu código JavaScript esté dentro de este script
+    // ...
 
-      let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
+    // Aquí está tu script principal completo:
+    // (Incluye todo el código JavaScript que tenías antes)
+    // ----------------------------------------------
 
-      // Inicializar el mapa
-      let map = L.map('map').setView([28.0665, -16.7332], 13);
+    // Variables y elementos DOM
+    const vInicialSwitch = document.getElementById('vInicialSwitch');
+    const vFinalSwitch = document.getElementById('vFinalSwitch');
+    const toggleLegendSwitch = document.getElementById('toggleLegendSwitch');
+    const themeSwitch = document.getElementById('themeSwitch');
+    const sidebar = document.getElementById('sidebar');
+    const rightSidebar = document.getElementById('rightSidebar');
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const legendPanel = document.getElementById('legendPanel');
+    const legendContent = document.getElementById('legendContent');
+    const summaryContent = document.getElementById('summaryContent');
+    const mapContainer = document.getElementById('mapContainer');
+    const header = document.querySelector("header");
+    const loader = document.getElementById('loader');
+    const exportMapBtn = document.getElementById('exportMapBtn');
+    const searchInput = document.getElementById('searchInput');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const toggleRightSidebarBtn = document.getElementById('toggleRightSidebarBtn');
+    let csvData = null; // Variable para almacenar los datos CSV en memoria
 
-      // Capas base
-      const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; OpenStreetMap',
-        maxZoom: 18,
-      });
+    let polygonsByZone = {}; // Objeto para almacenar polígonos por zona
 
-      const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; OpenTopoMap',
-        maxZoom: 17,
-      });
+    // Inicializar el mapa
+    let map = L.map('map').setView([28.0665, -16.7332], 13);
 
-      streetMap.addTo(map);
+    // Capas base
+    const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; OpenStreetMap',
+      maxZoom: 18,
+    });
 
-      const baseMaps = {
-        "Callejero": streetMap,
-        "Topográfico": topoMap
-      };
+    const topoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data &copy; OpenTopoMap',
+      maxZoom: 17,
+    });
 
-      // Control de capas
-      L.control.layers(baseMaps).addTo(map);
+    streetMap.addTo(map);
 
-      // Botón para restablecer vista inicial
-      L.easyButton('fa-home', function(btn, map){
-        map.setView([28.0665, -16.7332], 13);
-      }).addTo(map);
+    const baseMaps = {
+      "Callejero": streetMap,
+      "Topográfico": topoMap
+    };
 
-      let polygonLayer = L.featureGroup().addTo(map);
+    // Control de capas
+    L.control.layers(baseMaps).addTo(map);
 
-      // Manejar cambios de interruptores
-      vInicialSwitch.addEventListener('change', handleSwitchChange);
-      vFinalSwitch.addEventListener('change', handleSwitchChange);
+    // Botón para restablecer vista inicial
+    L.easyButton('fa-home', function(btn, map){
+      map.setView([28.0665, -16.7332], 13);
+    }).addTo(map);
 
-      function handleSwitchChange() {
-        if (this === vInicialSwitch && vInicialSwitch.checked) {
-          vFinalSwitch.checked = false;
-        } else if (this === vFinalSwitch && vFinalSwitch.checked) {
-          vInicialSwitch.checked = false;
-        }
+    let polygonLayer = L.featureGroup().addTo(map);
 
-        if (csvData) {
+    // Manejar cambios de interruptores
+    vInicialSwitch.addEventListener('change', handleSwitchChange);
+    vFinalSwitch.addEventListener('change', handleSwitchChange);
+
+    function handleSwitchChange() {
+      if (this === vInicialSwitch && vInicialSwitch.checked) {
+        vFinalSwitch.checked = false;
+      } else if (this === vFinalSwitch && vFinalSwitch.checked) {
+        vInicialSwitch.checked = false;
+      }
+
+      if (csvData) {
+        clearMap();
+        processCSVData(csvData);
+        generateSummary(csvData);
+      }
+    }
+
+    fileInput.addEventListener('change', handleFileSelection);
+
+    function handleFileSelection() {
+      const file = fileInput.files[0];
+      if (file && file.name.endsWith('.csv')) {
+        fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
+        loadCSV(file);
+      } else {
+        alert('Por favor, seleccione un archivo CSV válido.');
+        fileInput.value = '';
+      }
+    }
+
+    function loadCSV(file) {
+      loader.style.display = 'block';
+      Papa.parse(file, {
+        header: true,
+        complete: function(results) {
+          csvData = results.data;
           clearMap();
           processCSVData(csvData);
           generateSummary(csvData);
+          loader.style.display = 'none';
+          alert('Archivo CSV cargado exitosamente.');
+        },
+        error: function(error) {
+          loader.style.display = 'none';
+          alert('Error al cargar el archivo CSV: ' + error.message);
         }
-      }
-
-      fileInput.addEventListener('change', handleFileSelection);
-
-      function handleFileSelection() {
-        const file = fileInput.files[0];
-        if (file && file.name.endsWith('.csv')) {
-          fileName.innerHTML = `<i class="fas fa-file-csv"></i> ${file.name}`;
-          loadCSV(file);
-        } else {
-          alert('Por favor, seleccione un archivo CSV válido.');
-          fileInput.value = '';
-        }
-      }
-
-      function loadCSV(file) {
-        loader.style.display = 'block';
-        Papa.parse(file, {
-          header: true,
-          complete: function(results) {
-            csvData = results.data;
-            clearMap();
-            processCSVData(csvData);
-            generateSummary(csvData);
-            loader.style.display = 'none';
-            alert('Archivo CSV cargado exitosamente.');
-          },
-          error: function(error) {
-            loader.style.display = 'none';
-            alert('Error al cargar el archivo CSV: ' + error.message);
-          }
-        });
-      }
-
-      function processCSVData(data) {
-        const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-        const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
-
-        const colorsPalette = [
-          '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
-          '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
-          '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
-          '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
-        ];
-
-        let usedColors = {};
-        let colorIndex = 0;
-
-        let zonesWithColors = [];
-        polygonsByZone = {};
-
-        data.forEach(function(row) {
-          try {
-            const polygonData = JSON.parse(row['Poligon']);
-            const sectionCensal = row['ZE. Sección Censal'];
-            const zone = row[zoneColumn];
-            const poliza = row[polizaColumn];
-            const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
-
-            const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
-
-            if (!usedColors[zone]) {
-              usedColors[zone] = colorsPalette[colorIndex];
-              colorIndex = (colorIndex + 1) % colorsPalette.length;
-              zonesWithColors.push({ zone, color: usedColors[zone] });
-            }
-
-            const leafletPolygon = L.polygon(coordinates, {
-              color: usedColors[zone],
-              fillColor: usedColors[zone],
-              fillOpacity: 0.4,
-              weight: 2
-            }).addTo(polygonLayer);
-
-            if (!polygonsByZone[zone]) {
-              polygonsByZone[zone] = [];
-            }
-            polygonsByZone[zone].push(leafletPolygon);
-
-            leafletPolygon.on('mouseover', function () {
-              this.setStyle({
-                weight: 5,
-                color: '#666',
-                fillOpacity: 0.6,
-                fillColor: usedColors[zone]
-              });
-            });
-
-            leafletPolygon.on('mouseout', function () {
-              this.setStyle({
-                weight: 2,
-                color: usedColors[zone],
-                fillOpacity: 0.4
-              });
-            });
-
-            leafletPolygon.bindPopup(`
-              <b>Sección Censal:</b> ${sectionCensal}<br>
-              <b>Zona de Explotación:</b> ${zone}<br>
-              <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
-              <b>Pólizas:</b> ${poliza}
-            `);
-          } catch (error) {
-            console.error("Error al procesar el polígono:", error);
-          }
-        });
-
-        zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone));
-
-        legendContent.innerHTML = '';
-
-        let zonesVisibility = {};
-
-        zonesWithColors.forEach(item => {
-          const legendItem = document.createElement('li');
-          legendItem.className = 'legend-item';
-          
-          const colorBox = document.createElement('span');
-          colorBox.className = 'legend-color-box';
-          colorBox.style.backgroundColor = item.color;
-          
-          const itemText = document.createElement('span');
-          itemText.className = 'legend-item-text';
-          itemText.textContent = item.zone;
-          
-          legendItem.appendChild(colorBox);
-          legendItem.appendChild(itemText);
-          
-          legendItem.setAttribute('data-zone', item.zone);
-
-          zonesVisibility[item.zone] = true;
-
-          legendItem.addEventListener('click', function() {
-            const zone = this.getAttribute('data-zone');
-            const isVisible = zonesVisibility[zone];
-            zonesVisibility[zone] = !isVisible;
-
-            polygonsByZone[zone].forEach(polygon => {
-              if (zonesVisibility[zone]) {
-                polygon.addTo(polygonLayer);
-                legendItem.classList.remove('inactive');
-              } else {
-                polygonLayer.removeLayer(polygon);
-                legendItem.classList.add('inactive');
-              }
-            });
-          });
-
-          legendItem.addEventListener('mouseover', function() {
-            const zone = this.getAttribute('data-zone');
-            polygonsByZone[zone].forEach(polygon => {
-              polygon.setStyle({
-                weight: 5,
-                color: '#fff',
-                fillOpacity: 0.7,
-              });
-            });
-          });
-
-          legendItem.addEventListener('mouseout', function() {
-            const zone = this.getAttribute('data-zone');
-            polygonsByZone[zone].forEach(polygon => {
-              polygon.setStyle({
-                weight: 2,
-                color: usedColors[zone],
-                fillOpacity: 0.4,
-              });
-            });
-          });
-
-          legendContent.appendChild(legendItem);
-        });
-
-        if (polygonLayer.getLayers().length > 0) {
-          map.fitBounds(polygonLayer.getBounds());
-        }
-      }
-
-      // Añadir funcionalidad de búsqueda
-      searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        document.querySelectorAll('.legend-item').forEach(item => {
-          const zoneName = item.getAttribute('data-zone').toLowerCase();
-          if (zoneName.includes(searchTerm)) {
-            item.style.display = 'flex';
-          } else {
-            item.style.display = 'none';
-          }
-        });
       });
+    }
 
-      // Limpiar los polígonos del mapa
-      function clearMap() {
-        polygonLayer.clearLayers();
-      }
+    function processCSVData(data) {
+      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+      const polizaColumn = vInicialSwitch.checked ? 'Pol. ZE. Zona de Explotación' : 'Pol. Nueva Zona';
 
-      // Generar el resumen dinámico en la barra derecha
-      function generateSummary(data) {
-        const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
-        const summary = {};
+      const colorsPalette = [
+        '#87CEEB', '#FF7F50', '#32CD32', '#FFD700', '#FF69B4', '#6A5ACD',
+        '#40E0D0', '#DA70D6', '#FFA07A', '#8FBC8B', '#00CED1', '#BDB76B', 
+        '#FF6347', '#4682B4', '#D2B48C', '#CD5C5C', '#F08080', '#20B2AA', 
+        '#66CDAA', '#9370DB', '#FF4500', '#F4A460', '#2E8B57', '#6B8E23', '#BA55D3'
+      ];
 
-        data.forEach(function(row) {
-          const zone = row[zoneColumn];
+      let usedColors = {};
+      let colorIndex = 0;
+
+      let zonesWithColors = [];
+      polygonsByZone = {};
+
+      data.forEach(function(row) {
+        try {
+          const polygonData = JSON.parse(row['Poligon']);
           const sectionCensal = row['ZE. Sección Censal'];
-          const polizaSeccionCensal = parseInt(row['Pol. ZE. Sección Censal'] || 0);
-          const polizaZona = parseInt(vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] || 0 : row['Pol. Nueva Zona'] || 0);
+          const zone = row[zoneColumn];
+          const poliza = row[polizaColumn];
+          const polizaSeccionCensal = row['Pol. ZE. Sección Censal'];
 
-          if (!summary[zone]) {
-            summary[zone] = {
-              totalPolizasZona: polizaZona,
-              secciones: {}
-            };
+          const coordinates = polygonData.coordinates[0].map(coord => [coord[1], coord[0]]);
+
+          if (!usedColors[zone]) {
+            usedColors[zone] = colorsPalette[colorIndex];
+            colorIndex = (colorIndex + 1) % colorsPalette.length;
+            zonesWithColors.push({ zone, color: usedColors[zone] });
           }
 
-          if (!summary[zone].secciones[sectionCensal]) {
-            summary[zone].secciones[sectionCensal] = {
-              totalPolizasSeccion: polizaSeccionCensal
-            };
+          const leafletPolygon = L.polygon(coordinates, {
+            color: usedColors[zone],
+            fillColor: usedColors[zone],
+            fillOpacity: 0.4,
+            weight: 2
+          }).addTo(polygonLayer);
+
+          if (!polygonsByZone[zone]) {
+            polygonsByZone[zone] = [];
           }
-        });
+          polygonsByZone[zone].push(leafletPolygon);
 
-        // Generar datos para el gráfico
-        generateChartData(summary);
+          leafletPolygon.on('mouseover', function () {
+            this.setStyle({
+              weight: 5,
+              color: '#666',
+              fillOpacity: 0.6,
+              fillColor: usedColors[zone]
+            });
+          });
 
-        summaryContent.innerHTML = '';
+          leafletPolygon.on('mouseout', function () {
+            this.setStyle({
+              weight: 2,
+              color: usedColors[zone],
+              fillOpacity: 0.4
+            });
+          });
 
-        for (const zone in summary) {
-          const zoneItem = document.createElement('div');
-          zoneItem.className = 'summary-zone';
+          leafletPolygon.bindPopup(`
+            <b>Sección Censal:</b> ${sectionCensal}<br>
+            <b>Zona de Explotación:</b> ${zone}<br>
+            <b>Pólizas ZE. Sección Censal:</b> ${polizaSeccionCensal}<br>
+            <b>Pólizas:</b> ${poliza}
+          `);
+        } catch (error) {
+          console.error("Error al procesar el polígono:", error);
+        }
+      });
 
-          const zoneHeader = document.createElement('div');
-          zoneHeader.className = 'summary-header';
-          zoneHeader.innerHTML = `
-            <span class="toggle-button"><i class="fas fa-chevron-right"></i></span>
-            <span class="zone-name">${zone}</span>
-            <span class="zone-total">Total Pólizas: ${summary[zone].totalPolizasZona}</span>
-          `;
-          zoneItem.appendChild(zoneHeader);
+      zonesWithColors.sort((a, b) => a.zone.localeCompare(b.zone));
 
-          const sectionsContainer = document.createElement('div');
-          sectionsContainer.className = 'sections-container';
+      legendContent.innerHTML = '';
 
-          for (const section in summary[zone].secciones) {
-            const sectionItem = document.createElement('div');
-            sectionItem.className = 'summary-section';
-            sectionItem.innerHTML = `
-              <span class="section-name">${section}</span>
-              <span class="section-total">${summary[zone].secciones[section].totalPolizasSeccion}</span>
-            `;
-            sectionsContainer.appendChild(sectionItem);
-          }
+      let zonesVisibility = {};
 
-          zoneItem.appendChild(sectionsContainer);
-          summaryContent.appendChild(zoneItem);
+      zonesWithColors.forEach(item => {
+        const legendItem = document.createElement('li');
+        legendItem.className = 'legend-item';
+        
+        const colorBox = document.createElement('span');
+        colorBox.className = 'legend-color-box';
+        colorBox.style.backgroundColor = item.color;
+        
+        const itemText = document.createElement('span');
+        itemText.className = 'legend-item-text';
+        itemText.textContent = item.zone;
+        
+        legendItem.appendChild(colorBox);
+        legendItem.appendChild(itemText);
+        
+        legendItem.setAttribute('data-zone', item.zone);
 
-          zoneHeader.addEventListener('click', function() {
-            const isVisible = sectionsContainer.style.display === 'block';
-            sectionsContainer.style.display = isVisible ? 'none' : 'block';
+        zonesVisibility[item.zone] = true;
 
-            const icon = this.querySelector('.toggle-button i');
-            if (isVisible) {
-              icon.classList.remove('fa-chevron-down');
-              icon.classList.add('fa-chevron-right');
+        legendItem.addEventListener('click', function() {
+          const zone = this.getAttribute('data-zone');
+          const isVisible = zonesVisibility[zone];
+          zonesVisibility[zone] = !isVisible;
+
+          polygonsByZone[zone].forEach(polygon => {
+            if (zonesVisibility[zone]) {
+              polygon.addTo(polygonLayer);
+              legendItem.classList.remove('inactive');
             } else {
-              icon.classList.remove('fa-chevron-right');
-              icon.classList.add('fa-chevron-down');
+              polygonLayer.removeLayer(polygon);
+              legendItem.classList.add('inactive');
             }
           });
-        }
+        });
+
+        legendItem.addEventListener('mouseover', function() {
+          const zone = this.getAttribute('data-zone');
+          polygonsByZone[zone].forEach(polygon => {
+            polygon.setStyle({
+              weight: 5,
+              color: '#fff',
+              fillOpacity: 0.7,
+            });
+          });
+        });
+
+        legendItem.addEventListener('mouseout', function() {
+          const zone = this.getAttribute('data-zone');
+          polygonsByZone[zone].forEach(polygon => {
+            polygon.setStyle({
+              weight: 2,
+              color: usedColors[zone],
+              fillOpacity: 0.4,
+            });
+          });
+        });
+
+        legendContent.appendChild(legendItem);
+      });
+
+      if (polygonLayer.getLayers().length > 0) {
+        map.fitBounds(polygonLayer.getBounds());
       }
+    }
 
-      // Generar gráfico de barras
-      function generateChartData(summary) {
-        const labels = Object.keys(summary);
-        const data = labels.map(zone => summary[zone].totalPolizasZona);
+    // Añadir funcionalidad de búsqueda
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      document.querySelectorAll('.legend-item').forEach(item => {
+        const zoneName = item.getAttribute('data-zone').toLowerCase();
+        if (zoneName.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
 
-        const ctx = document.getElementById('zoneChart').getContext('2d');
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Pólizas por Zona',
-              data: data,
-              backgroundColor: labels.map(zone => {
-                return polygonsByZone[zone][0].options.fillColor;
-              })
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
+    // Limpiar los polígonos del mapa
+    function clearMap() {
+      polygonLayer.clearLayers();
+    }
+
+    // Generar el resumen dinámico en la barra derecha
+    function generateSummary(data) {
+      const zoneColumn = vInicialSwitch.checked ? 'ZE. Zona de Explotación' : 'Nueva Zona';
+      const summary = {};
+
+      data.forEach(function(row) {
+        const zone = row[zoneColumn];
+        const sectionCensal = row['ZE. Sección Censal'];
+        const polizaSeccionCensal = parseInt(row['Pol. ZE. Sección Censal'] || 0);
+        const polizaZona = parseInt(vInicialSwitch.checked ? row['Pol. ZE. Zona de Explotación'] || 0 : row['Pol. Nueva Zona'] || 0);
+
+        if (!summary[zone]) {
+          summary[zone] = {
+            totalPolizasZona: polizaZona,
+            secciones: {}
+          };
+        }
+
+        if (!summary[zone].secciones[sectionCensal]) {
+          summary[zone].secciones[sectionCensal] = {
+            totalPolizasSeccion: polizaSeccionCensal
+          };
+        }
+      });
+
+      // Generar datos para el gráfico
+      generateChartData(summary);
+
+      summaryContent.innerHTML = '';
+
+      for (const zone in summary) {
+        const zoneItem = document.createElement('div');
+        zoneItem.className = 'summary-zone';
+
+        const zoneHeader = document.createElement('div');
+        zoneHeader.className = 'summary-header';
+        zoneHeader.innerHTML = `
+          <span class="toggle-button"><i class="fas fa-chevron-right"></i></span>
+          <span class="zone-name">${zone}</span>
+          <span class="zone-total">Total Pólizas: ${summary[zone].totalPolizasZona}</span>
+        `;
+        zoneItem.appendChild(zoneHeader);
+
+        const sectionsContainer = document.createElement('div');
+        sectionsContainer.className = 'sections-container';
+
+        for (const section in summary[zone].secciones) {
+          const sectionItem = document.createElement('div');
+          sectionItem.className = 'summary-section';
+          sectionItem.innerHTML = `
+            <span class="section-name">${section}</span>
+            <span class="section-total">${summary[zone].secciones[section].totalPolizasSeccion}</span>
+          `;
+          sectionsContainer.appendChild(sectionItem);
+        }
+
+        zoneItem.appendChild(sectionsContainer);
+        summaryContent.appendChild(zoneItem);
+
+        zoneHeader.addEventListener('click', function() {
+          const isVisible = sectionsContainer.style.display === 'block';
+          sectionsContainer.style.display = isVisible ? 'none' : 'block';
+
+          const icon = this.querySelector('.toggle-button i');
+          if (isVisible) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-right');
+          } else {
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-down');
           }
         });
       }
+    }
 
-      // Mostrar/Ocultar la barra lateral izquierda
-      toggleSidebarBtn.addEventListener('click', function() {
-        sidebar.classList.toggle('visible');
+    // Generar gráfico de barras
+    function generateChartData(summary) {
+      const labels = Object.keys(summary);
+      const data = labels.map(zone => summary[zone].totalPolizasZona);
 
-        const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
-        if (sidebar.classList.contains('visible')) {
-          leafletControls.style.left = '230px';
-        } else {
-          leafletControls.style.left = '50px';
+      const ctx = document.getElementById('zoneChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Pólizas por Zona',
+            data: data,
+            backgroundColor: labels.map(zone => {
+              return polygonsByZone[zone][0].options.fillColor;
+            })
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
         }
       });
+    }
 
-      // Mostrar/Ocultar la barra lateral derecha
-      toggleRightSidebarBtn.addEventListener('click', function() {
-        rightSidebar.classList.toggle('visible');
+    // Mostrar/Ocultar la barra lateral izquierda
+    toggleSidebarBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('visible');
 
-        const isRightSidebarVisible = rightSidebar.classList.contains('visible');
-        mapContainer.classList.toggle('blur', isRightSidebarVisible);
-        header.classList.toggle('blur', isRightSidebarVisible);
-        sidebar.classList.toggle('blur', isRightSidebarVisible);
-
-        const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
-        if (rightSidebar.classList.contains('visible')) {
-          leafletControls.style.right = '590px';
-        } else {
-          leafletControls.style.right = '70px';
-        }
-      });
-
-      // Mostrar/Ocultar la leyenda
-      toggleLegendSwitch.addEventListener('change', function() {
-        if (toggleLegendSwitch.checked) {
-          legendPanel.style.display = 'block';
-        } else {
-          legendPanel.style.display = 'none';
-        }
-      });
-
-      // Mover la leyenda
-      legendPanel.addEventListener('mousedown', dragMouseDown);
-
-      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-      function dragMouseDown(e) {
-        e = e || window.event;
-        if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
-          e.preventDefault();
-          pos3 = e.clientX;
-          pos4 = e.clientY;
-          document.onmouseup = closeDragElement;
-          document.onmousemove = elementDrag;
-        }
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
+      if (sidebar.classList.contains('visible')) {
+        leafletControls.style.left = '230px';
+      } else {
+        leafletControls.style.left = '50px';
       }
+    });
 
-      function elementDrag(e) {
-        e = e || window.event;
+    // Mostrar/Ocultar la barra lateral derecha
+    toggleRightSidebarBtn.addEventListener('click', function() {
+      rightSidebar.classList.toggle('visible');
+
+      const isRightSidebarVisible = rightSidebar.classList.contains('visible');
+      mapContainer.classList.toggle('blur', isRightSidebarVisible);
+      header.classList.toggle('blur', isRightSidebarVisible);
+      sidebar.classList.toggle('blur', isRightSidebarVisible);
+
+      const leafletControls = document.querySelector('.leaflet-top.leaflet-right');
+      if (rightSidebar.classList.contains('visible')) {
+        leafletControls.style.right = '590px';
+      } else {
+        leafletControls.style.right = '70px';
+      }
+    });
+
+    // Mostrar/Ocultar la leyenda
+    toggleLegendSwitch.addEventListener('change', function() {
+      if (toggleLegendSwitch.checked) {
+        legendPanel.style.display = 'block';
+      } else {
+        legendPanel.style.display = 'none';
+      }
+    });
+
+    // Mover la leyenda
+    legendPanel.addEventListener('mousedown', dragMouseDown);
+
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+    function dragMouseDown(e) {
+      e = e || window.event;
+      if (e.target.tagName === 'H3' || e.target.parentNode.tagName === 'H3') {
         e.preventDefault();
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
         pos3 = e.clientX;
         pos4 = e.clientY;
-        legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
-        legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
       }
+    }
 
-      function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-      }
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      legendPanel.style.top = (legendPanel.offsetTop - pos2) + "px";
+      legendPanel.style.left = (legendPanel.offsetLeft - pos1) + "px";
+    }
 
-      // Modo oscuro
-      themeSwitch.addEventListener('change', function() {
-        if (themeSwitch.checked) {
-          document.body.classList.add('dark-mode');
-          header.classList.add('dark-mode');
-          sidebar.classList.add('dark-mode');
-          rightSidebar.classList.add('dark-mode');
-          legendPanel.classList.add('dark-mode');
-          localStorage.setItem('theme', 'dark');
-        } else {
-          document.body.classList.remove('dark-mode');
-          header.classList.remove('dark-mode');
-          sidebar.classList.remove('dark-mode');
-          rightSidebar.classList.remove('dark-mode');
-          legendPanel.classList.remove('dark-mode');
-          localStorage.setItem('theme', 'light');
-        }
-      });
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+    }
 
-      // Cargar tema guardado
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'dark') {
+    // Modo oscuro
+    themeSwitch.addEventListener('change', function() {
+      if (themeSwitch.checked) {
         document.body.classList.add('dark-mode');
         header.classList.add('dark-mode');
         sidebar.classList.add('dark-mode');
         rightSidebar.classList.add('dark-mode');
         legendPanel.classList.add('dark-mode');
-        themeSwitch.checked = true;
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        header.classList.remove('dark-mode');
+        sidebar.classList.remove('dark-mode');
+        rightSidebar.classList.remove('dark-mode');
+        legendPanel.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
       }
-      vFinalSwitch.checked = false;
+    });
 
-      // Exportar mapa
-      exportMapBtn.addEventListener('click', function() {
-        html2canvas(document.getElementById('map')).then(canvas => {
-          const link = document.createElement('a');
-          link.download = 'mapa.png';
-          link.href = canvas.toDataURL();
-          link.click();
-        });
+    // Cargar tema guardado
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      header.classList.add('dark-mode');
+      sidebar.classList.add('dark-mode');
+      rightSidebar.classList.add('dark-mode');
+      legendPanel.classList.add('dark-mode');
+      themeSwitch.checked = true;
+    }
+    vFinalSwitch.checked = false;
+
+    // Exportar mapa
+    exportMapBtn.addEventListener('click', function() {
+      html2canvas(document.getElementById('map')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'mapa.png';
+        link.href = canvas.toDataURL();
+        link.click();
       });
     });
+
+    // ----------------------------------------------
   </script>
 
 </body>
