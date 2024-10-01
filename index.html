@@ -30,8 +30,8 @@
       color: white;
       display: flex;
       align-items: center;
-      padding: 0.5rem 0.5rem; /* Reducir padding para disminuir altura */
-      font-size: 1rem; /* Reducir tamaño de fuente */
+      padding: 0.3rem 0.5rem;
+      font-size: 1rem;
       font-weight: 500;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       position: fixed;
@@ -50,7 +50,7 @@
       font-size: 1rem;
       background-color: #3498db;
       color: white;
-      padding: 0.4rem 0.6rem; /* Ajustar padding */
+      padding: 0.4rem 0.6rem;
       border: none;
       cursor: pointer;
       border-radius: 5px;
@@ -75,9 +75,8 @@
     }
 
     .map-container {
-      /* Ajustar margen y altura dinámicamente */
-      margin-top: 50px; /* Reducir margen superior */
-      height: calc(100vh - 50px); /* Ajustar altura del mapa */
+      margin-top: 50px;
+      height: calc(100vh - 50px);
     }
 
     .map {
@@ -88,9 +87,9 @@
 
     /* Barra lateral izquierda */
     .sidebar {
-      height: calc(100vh - 50px); /* Ajustar altura */
+      height: calc(100vh - 50px);
       position: fixed;
-      top: 50px; /* Ajustar posición */
+      top: 50px;
       left: 0;
       width: 200px;
       background-color: #34495e;
@@ -125,7 +124,7 @@
     }
 
     .sidebar.visible ~ .leaflet-top.leaflet-left {
-      left: 220px;
+      left: 220px; /* Se ajustará dinámicamente en JavaScript */
     }
 
     /* Botones y elementos de la barra lateral izquierda */
@@ -235,9 +234,9 @@
 
     /* Barra lateral derecha con resumen y scroll */
     .right-sidebar {
-      height: calc(100vh - 50px); /* Ajustar altura */
+      height: calc(100vh - 50px);
       position: fixed;
-      top: 50px; /* Ajustar posición */
+      top: 50px;
       right: 0;
       width: 80%;
       max-width: 540px;
@@ -373,6 +372,9 @@
     }
 
     .legend-content {
+      display: flex; /* Cambiar a flex */
+      flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
+      gap: 0.5rem; /* Espacio entre elementos */
       list-style: none;
       padding: 0;
       margin: 0;
@@ -383,11 +385,12 @@
     .legend-item {
       display: flex;
       align-items: center;
-      margin-bottom: 0.5rem;
       cursor: pointer;
       padding: 0.5rem;
       border-radius: 5px;
       transition: background-color 0.2s;
+      flex: 1 1 calc(50% - 1rem); /* Ajustar ancho para que quepan dos por fila */
+      box-sizing: border-box;
     }
 
     .legend-item:hover {
@@ -464,6 +467,10 @@
       .leaflet-top.leaflet-right {
         top: 60px;
         right: 10px;
+      }
+
+      .legend-item {
+        flex: 1 1 calc(100% - 1rem); /* En pantallas pequeñas, una por fila */
       }
     }
 
@@ -882,8 +889,11 @@
       sidebar.classList.toggle('visible');
 
       const leafletControls = document.querySelector('.leaflet-top.leaflet-left');
+      const gap = 10; // Espacio entre la barra lateral y los controles
+
       if (sidebar.classList.contains('visible')) {
-        leafletControls.style.left = '220px';
+        const sidebarWidth = sidebar.offsetWidth;
+        leafletControls.style.left = (sidebarWidth + gap) + 'px';
       } else {
         leafletControls.style.left = '10px';
       }
